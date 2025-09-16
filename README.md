@@ -5,7 +5,9 @@ A beautiful, real-time CV template generator. Choose from multiple professional 
 ## ✨ Key Features
 
 -   **Live Preview:** See your CV update in real-time as you type.
--   **Multiple Themes:** Choose from a selection of professionally designed templates (`Modern Professional`, `Classic Elegance`, `Creative Tech`).
+-   **Multiple Themes:** Choose from a selection of professionally designed templates (`Modern Professional`, `Classic Elegance`, `Creative Tech`, `Professional Deep Blue`, `Corporate Blue`, `Earthy Tones`, `Rounded Charm`).
+-   **Color & Font Customization:** Personalize your chosen theme with custom colors and a selection of professional fonts.
+-   **Layout Resizing:** Adjust the base font size, heading scale, and overall spacing to perfectly tailor the layout to your content.
 -   **Comprehensive Editing:** Easily add, edit, and delete sections for:
     -   Personal Information & Profile Photo
     -   Work Experience
@@ -28,7 +30,8 @@ A beautiful, real-time CV template generator. Choose from multiple professional 
 2.  **Add your experience:** Fill out the sections for Work Experience, Education, and Skills. Use the `+ Add` buttons to create new entries.
 3.  **Upload a photo:** Personalize your CV by uploading a professional profile picture.
 4.  **Choose a theme:** Select a theme from the options at the top to instantly change the look and feel of your CV.
-5.  **Download:** Once you are happy with the preview, click the **Download PDF** button to save a high-quality version to your device.
+5.  **Customize:** Fine-tune your chosen theme with the color, font, and sizing selectors.
+6.  **Download:** Once you are happy with the preview, click the **Download PDF** button to save a high-quality version to your device.
 
 ## File Structure
 
@@ -43,6 +46,6 @@ A beautiful, real-time CV template generator. Choose from multiple professional 
 └── components/
     ├── CVForm.tsx      # The main form for user input
     ├── CVPreview.tsx   # Renders the live CV preview
-    ├── ThemeSelector.tsx # Component for choosing a theme
+    ├── ThemeSelector.tsx # Component for choosing and customizing a theme
     └── Icons.tsx       # SVG icon components
 ```

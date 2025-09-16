@@ -1,4 +1,5 @@
-import type { CVData, Theme } from './types';
+
+import type { CVData, Theme, FontOption } from './types';
 
 export const INITIAL_CV_DATA: CVData = {
   personalInfo: {
@@ -48,56 +49,201 @@ export const INITIAL_CV_DATA: CVData = {
     { id: 'skill6', name: 'UI/UX Design' },
     { id: 'skill7', name: 'REST APIs' },
     { id: 'skill8', name: 'Agile Methodologies' }
+  ],
+  languages: [
+      { id: 'lang1', name: 'English', level: 'Native' },
+      { id: 'lang2', name: 'Spanish', level: 'Professional' },
+  ],
+  interests: [
+      { id: 'int1', name: 'Open Source' },
+      { id: 'int2', name: 'Hiking' },
+      { id: 'int3', name: 'Photography' },
   ]
 };
+
+const FONT_OPTIONS: Record<string, FontOption> = {
+  INTER: { name: 'Inter', value: 'font-sans' },
+  LORA: { name: 'Lora', value: '[font-family:Lora,serif]' },
+  SOURCE_SANS: { name: 'Source Sans 3', value: '[font-family:Source_Sans_3,sans-serif]' },
+  ROBOTO: { name: 'Roboto', value: '[font-family:Roboto,sans-serif]' },
+  LATO: { name: 'Lato', value: '[font-family:Lato,sans-serif]' },
+  MONTSERRAT: { name: 'Montserrat', value: '[font-family:Montserrat,sans-serif]' },
+  PLAYFAIR: { name: 'Playfair Display', value: '[font-family:"Playfair Display",serif]' },
+  MERRIWEATHER: { name: 'Merriweather', value: '[font-family:Merriweather,serif]' },
+};
+
+const SANS_SERIF_FONTS = [FONT_OPTIONS.INTER, FONT_OPTIONS.ROBOTO, FONT_OPTIONS.LATO, FONT_OPTIONS.MONTSERRAT];
+const SERIF_FONTS = [FONT_OPTIONS.LORA, FONT_OPTIONS.PLAYFAIR, FONT_OPTIONS.MERRIWEATHER];
 
 export const THEMES: Theme[] = [
   {
     name: 'Modern Professional',
-    font: 'font-sans',
+    font: FONT_OPTIONS.INTER.value,
+    fonts: SANS_SERIF_FONTS,
     colors: {
-      primary: 'text-gray-900',
-      secondary: 'text-blue-600',
-      accent: 'bg-blue-600',
-      background: 'bg-white',
-      text: 'text-gray-700',
-      textSecondary: 'text-gray-500'
+      primary: '#111827',
+      secondary: '#2563EB',
+      accent: '#2563EB',
+      background: '#FFFFFF',
+      text: '#374151',
+      textSecondary: '#6B7280'
     },
     layout: {
+      style: 'single-column',
       headerAlignment: 'text-left',
-      sectionTitleStyle: 'text-xl font-bold text-blue-600 border-b-2 border-blue-200 pb-1 mb-4'
+      sectionTitleStyle: 'text-xl font-bold border-b-2 pb-1 mb-4'
+    },
+    sizing: {
+      baseFontSize: 10,
+      headingScale: 1.1,
+      spacing: 1.0,
     }
   },
   {
     name: 'Classic Elegance',
-    font: '[font-family:Lora,serif]',
+    font: FONT_OPTIONS.LORA.value,
+    fonts: SERIF_FONTS,
     colors: {
-      primary: 'text-gray-800',
-      secondary: 'text-gray-600',
-      accent: 'bg-gray-800',
-      background: 'bg-white',
-      text: 'text-gray-700',
-      textSecondary: 'text-gray-500'
+      primary: '#1F2937',
+      secondary: '#4B5563',
+      accent: '#1F2937',
+      background: '#FFFFFF',
+      text: '#374151',
+      textSecondary: '#6B7280'
     },
     layout: {
+      style: 'single-column',
       headerAlignment: 'text-center',
-      sectionTitleStyle: 'text-lg font-semibold tracking-widest uppercase text-gray-700 border-b border-gray-300 pb-2 mb-4'
+      sectionTitleStyle: 'text-lg font-semibold tracking-widest uppercase border-b pb-2 mb-4'
+    },
+    sizing: {
+      baseFontSize: 10,
+      headingScale: 1.0,
+      spacing: 1.1,
     }
   },
   {
     name: 'Creative Tech',
-    font: '[font-family:Source_Sans_3,sans-serif]',
+    font: FONT_OPTIONS.SOURCE_SANS.value,
+    fonts: [FONT_OPTIONS.SOURCE_SANS, ...SANS_SERIF_FONTS],
     colors: {
-      primary: 'text-gray-900',
-      secondary: 'text-teal-500',
-      accent: 'bg-teal-500',
-      background: 'bg-gray-50',
-      text: 'text-gray-800',
-      textSecondary: 'text-gray-500'
+      primary: '#111827',
+      secondary: '#14B8A6',
+      accent: '#14B8A6',
+      background: '#F9FAFB',
+      text: '#1F2937',
+      textSecondary: '#6B7280'
     },
     layout: {
+      style: 'single-column',
       headerAlignment: 'text-left',
-      sectionTitleStyle: 'text-2xl font-light text-teal-600 mb-4'
+      sectionTitleStyle: 'text-2xl font-light mb-4'
+    },
+    sizing: {
+      baseFontSize: 11,
+      headingScale: 1.2,
+      spacing: 1.0,
+    }
+  },
+    {
+    name: 'Professional Deep Blue',
+    font: FONT_OPTIONS.INTER.value,
+    fonts: SANS_SERIF_FONTS,
+    colors: {
+      primary: '#0D1B2A',      // Dark Blue (Name, Section Titles)
+      secondary: '#6B7280',    // Gray (Job Title)
+      accent: '#0D1B2A',       // Use dark blue for form buttons
+      background: '#FFFFFF',    // White (Main content bg)
+      text: '#1F2937',         // Main text color
+      textSecondary: '#4B5563', // Lighter text
+      sidebarBackground: '#E6F0FA', // Light Blue (Sidebar bg)
+      sidebarText: '#0D1B2A',      // Text on sidebar
+    },
+    layout: {
+      style: 'two-column',
+      headerAlignment: 'text-left',
+      sectionTitleStyle: 'text-sm font-bold uppercase tracking-wider mb-3',
+    },
+    sizing: {
+      baseFontSize: 9.5,
+      headingScale: 1.1,
+      spacing: 1.0,
+    }
+  },
+  {
+    name: 'Corporate Blue',
+    font: FONT_OPTIONS.INTER.value,
+    fonts: SANS_SERIF_FONTS,
+    colors: {
+      primary: '#374151', // Main content name color
+      secondary: '#6B7280', // Main content title color
+      accent: '#3B82F6', // Timeline dots, skill tags
+      background: '#FFFFFF',
+      text: '#1F2937',
+      textSecondary: '#4B5563',
+      sidebarBackground: '#1E293B', // Dark blue sidebar
+      sidebarText: '#E2E8F0',
+    },
+    layout: {
+      style: 'two-column',
+      headerAlignment: 'text-left',
+      sectionTitleStyle: 'text-lg font-bold uppercase tracking-wider mb-4',
+    },
+    sizing: {
+      baseFontSize: 10.5,
+      headingScale: 1.05,
+      spacing: 1.0,
+    }
+  },
+  {
+    name: 'Earthy Tones',
+    font: FONT_OPTIONS.SOURCE_SANS.value,
+    fonts: [FONT_OPTIONS.SOURCE_SANS, ...SERIF_FONTS],
+    colors: {
+      primary: '#4E342E',
+      secondary: '#795548',
+      accent: '#A1887F', // BG for section titles
+      background: '#F5F5F5',
+      text: '#4E342E',
+      textSecondary: '#6D4C41',
+      sidebarBackground: '#EFEBE9', // Light beige sidebar
+      sidebarText: '#5D4037',
+    },
+    layout: {
+      style: 'two-column',
+      headerAlignment: 'text-left',
+      sectionTitleStyle: 'text-xl font-semibold mb-4',
+    },
+    sizing: {
+      baseFontSize: 10,
+      headingScale: 1.2,
+      spacing: 1.1,
+    }
+  },
+  {
+    name: 'Rounded Charm',
+    font: FONT_OPTIONS.MONTSERRAT.value,
+    fonts: SANS_SERIF_FONTS,
+    colors: {
+      primary: '#1E293B', // Dark Slate
+      secondary: '#475569', // Medium Slate
+      accent: '#8B5CF6', // Violet
+      background: '#FFFFFF',
+      text: '#334155',
+      textSecondary: '#64748B',
+      sidebarBackground: '#F3F4F6', // Light Gray
+      sidebarText: '#1E293B',
+    },
+    layout: {
+      style: 'two-column',
+      headerAlignment: 'text-left',
+      sectionTitleStyle: 'text-lg font-bold uppercase tracking-wider mb-4',
+      borderRadius: 'rounded-3xl',
+    },
+    sizing: {
+      baseFontSize: 10,
+      headingScale: 1.15,
+      spacing: 1.0,
     }
   }
 ];

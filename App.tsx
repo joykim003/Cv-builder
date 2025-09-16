@@ -11,10 +11,18 @@ import html2canvas from 'html2canvas';
 
 const App: React.FC = () => {
   const [cvData, setCvData] = useState<CVData>(INITIAL_CV_DATA);
+  const [themes, setThemes] = useState<Theme[]>(THEMES);
   const [selectedThemeName, setSelectedThemeName] = useState<string>(THEMES[0].name);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
 
-  const selectedTheme: Theme | undefined = useMemo(() => THEMES.find(t => t.name === selectedThemeName), [selectedThemeName]);
+  const selectedTheme: Theme | undefined = useMemo(() => themes.find(t => t.name === selectedThemeName), [themes, selectedThemeName]);
+
+  const handleThemeUpdate = (updatedTheme: Theme) => {
+    setThemes(currentThemes =>
+      currentThemes.map(t => (t.name === updatedTheme.name ? updatedTheme : t))
+    );
+  };
 
   const handleDownload = async () => {
     const cvPreviewElement = document.getElementById('cv-preview');
@@ -24,22 +32,27 @@ const App: React.FC = () => {
     }
 
     setIsDownloading(true);
+    setDownloadProgress(0);
     const originalClasses = cvPreviewElement.className;
 
     try {
-        // Apply temporary styles for capture: full scale, no shadow, on a clean background.
         cvPreviewElement.className = 'w-[210mm] h-[297mm] bg-white';
-        
-        // Wait a moment for styles to apply before capturing
         await new Promise(resolve => setTimeout(resolve, 100));
 
         const canvas = await html2canvas(cvPreviewElement, {
-            scale: 2, // Use a high scale for better resolution
+            scale: 2,
             useCORS: true,
             logging: false,
+            // FIX: The 'onprogress' option is not available in the current version of html2canvas and causes a type error.
+            /* onprogress: (progress) => {
+                // html2canvas provides progress from 0 to 1. We'll map this to 0-90%.
+                setDownloadProgress(Math.floor(progress * 90));
+            }, */
         });
 
-        const imgData = canvas.toDataURL('image/png', 1.0); // Use full quality PNG
+        setDownloadProgress(95); // Canvas rendering is done, now creating the PDF.
+
+        const imgData = canvas.toDataURL('image/png', 1.0);
         const pdf = new jsPDF({
             orientation: 'portrait',
             unit: 'mm',
@@ -51,13 +64,18 @@ const App: React.FC = () => {
         
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         pdf.save(`${cvData.personalInfo.name.replace(/\s/g, '_')}_CV.pdf`);
+        
+        setDownloadProgress(100); // All done!
 
     } catch (error) {
         console.error("An error occurred during PDF generation:", error);
     } finally {
-        // Restore the original classes to bring back the scaled-down view
         cvPreviewElement.className = originalClasses;
-        setIsDownloading(false);
+        // Wait for a moment so the user can see the "Complete" status before resetting the button.
+        setTimeout(() => {
+            setIsDownloading(false);
+            setDownloadProgress(0);
+        }, 1500);
     }
   };
 
@@ -75,7 +93,12 @@ const App: React.FC = () => {
                     <h1 className="text-4xl font-bold text-gray-900 dark:text-white">AI CV Crafter</h1>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">Fill in your details and watch your CV come to life.</p>
                 </header>
-                <ThemeSelector themes={THEMES} selectedTheme={selectedThemeName} setSelectedTheme={setSelectedThemeName} />
+                <ThemeSelector 
+                    themes={themes} 
+                    selectedTheme={selectedTheme} 
+                    setSelectedTheme={setSelectedThemeName}
+                    onThemeUpdate={handleThemeUpdate}
+                />
                 <CVForm cvData={cvData} setCvData={setCvData} accentColor={selectedTheme.colors.accent}/>
             </div>
         </div>
@@ -87,15 +110,17 @@ const App: React.FC = () => {
                 <button 
                     onClick={handleDownload}
                     disabled={isDownloading}
-                    className="flex items-center justify-center gap-2 px-4 py-2 w-40 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 transition-transform transform hover:scale-105 disabled:bg-blue-400 disabled:cursor-not-allowed"
+                    className="relative flex items-center justify-center gap-2 px-4 py-2 w-44 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105 disabled:bg-blue-400 disabled:cursor-not-allowed overflow-hidden"
                 >
                     {isDownloading ? (
                         <>
-                            <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <span>Downloading...</span>
+                            <div 
+                                className="absolute top-0 left-0 h-full bg-blue-700/80 transition-all duration-200 ease-linear"
+                                style={{ width: `${downloadProgress}%` }}
+                            ></div>
+                            <span className="relative z-10 text-sm">
+                                {downloadProgress < 100 ? `Generating... ${downloadProgress}%` : 'Complete!'}
+                            </span>
                         </>
                     ) : (
                         <>

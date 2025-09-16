@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import type { CVData, Experience, Education, Skill } from '../types';
+import type { CVData, Experience, Education, Skill, Language, Interest } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 
 interface CVFormProps {
@@ -99,7 +100,7 @@ const SectionWrapper: React.FC<{ title: string; children: React.ReactNode }> = (
     </div>
 );
 
-type DeletableSection = 'experience' | 'education' | 'skills';
+type DeletableSection = 'experience' | 'education' | 'skills' | 'languages' | 'interests';
 
 export const CVForm: React.FC<CVFormProps> = ({ cvData, setCvData, accentColor }) => {
     const [itemToDelete, setItemToDelete] = useState<{ section: DeletableSection; id: string } | null>(null);
@@ -123,12 +124,16 @@ export const CVForm: React.FC<CVFormProps> = ({ cvData, setCvData, accentColor }
     };
 
     const addArrayItem = (section: DeletableSection) => {
-        let newItem: Experience | Education | Skill;
+        let newItem: Experience | Education | Skill | Language | Interest;
         if(section === 'experience') {
             newItem = { id: uuidv4(), company: '', role: '', startDate: '', endDate: '', description: '' };
         } else if (section === 'education') {
             newItem = { id: uuidv4(), institution: '', degree: '', startDate: '', endDate: '', description: '' };
-        } else {
+        } else if (section === 'skills') {
+            newItem = { id: uuidv4(), name: '' };
+        } else if (section === 'languages') {
+            newItem = { id: uuidv4(), name: '', level: '' };
+        } else { // interests
             newItem = { id: uuidv4(), name: '' };
         }
         setCvData(prev => ({ ...prev, [section]: [...prev[section], newItem] }));
@@ -183,7 +188,7 @@ export const CVForm: React.FC<CVFormProps> = ({ cvData, setCvData, accentColor }
             <button type="button" onClick={() => setItemToDelete({ section: 'experience', id: exp.id })} className="absolute top-2 right-2 text-red-500 hover:text-red-700">&times;</button>
           </div>
         ))}
-        <button type="button" onClick={() => addArrayItem('experience')} className={`w-full py-2 ${accentColor} text-white font-semibold rounded-md hover:opacity-90 transition`}>+ Add Experience</button>
+        <button type="button" onClick={() => addArrayItem('experience')} style={{backgroundColor: accentColor}} className="w-full py-2 text-white font-semibold rounded-md hover:opacity-90 transition">+ Add Experience</button>
       </SectionWrapper>
       
       <SectionWrapper title="Education">
@@ -199,7 +204,7 @@ export const CVForm: React.FC<CVFormProps> = ({ cvData, setCvData, accentColor }
             <button type="button" onClick={() => setItemToDelete({ section: 'education', id: edu.id })} className="absolute top-2 right-2 text-red-500 hover:text-red-700">&times;</button>
           </div>
         ))}
-        <button type="button" onClick={() => addArrayItem('education')} className={`w-full py-2 ${accentColor} text-white font-semibold rounded-md hover:opacity-90 transition`}>+ Add Education</button>
+        <button type="button" onClick={() => addArrayItem('education')} style={{backgroundColor: accentColor}} className="w-full py-2 text-white font-semibold rounded-md hover:opacity-90 transition">+ Add Education</button>
       </SectionWrapper>
 
       <SectionWrapper title="Skills">
@@ -209,7 +214,30 @@ export const CVForm: React.FC<CVFormProps> = ({ cvData, setCvData, accentColor }
             <button type="button" onClick={() => setItemToDelete({ section: 'skills', id: skill.id })} className="mt-6 text-red-500 hover:text-red-700">&times;</button>
           </div>
         ))}
-        <button type="button" onClick={() => addArrayItem('skills')} className={`w-full py-2 ${accentColor} text-white font-semibold rounded-md hover:opacity-90 transition`}>+ Add Skill</button>
+        <button type="button" onClick={() => addArrayItem('skills')} style={{backgroundColor: accentColor}} className="w-full py-2 text-white font-semibold rounded-md hover:opacity-90 transition">+ Add Skill</button>
+      </SectionWrapper>
+      
+      <SectionWrapper title="Languages">
+        {cvData.languages.map((lang, index) => (
+          <div key={lang.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg space-y-3 relative">
+            <div className="grid grid-cols-2 gap-4">
+                <InputField label="Language" value={lang.name} onChange={(e) => handleArrayChange('languages', index, 'name', e.target.value)} />
+                <InputField label="Level" value={lang.level} onChange={(e) => handleArrayChange('languages', index, 'level', e.target.value)} placeholder="e.g., Native, Fluent" />
+            </div>
+            <button type="button" onClick={() => setItemToDelete({ section: 'languages', id: lang.id })} className="absolute top-2 right-2 text-red-500 hover:text-red-700">&times;</button>
+          </div>
+        ))}
+        <button type="button" onClick={() => addArrayItem('languages')} style={{backgroundColor: accentColor}} className="w-full py-2 text-white font-semibold rounded-md hover:opacity-90 transition">+ Add Language</button>
+      </SectionWrapper>
+      
+      <SectionWrapper title="Interests">
+        {cvData.interests.map((interest, index) => (
+          <div key={interest.id} className="flex items-center gap-2">
+            <InputField label={`Interest ${index + 1}`} value={interest.name} onChange={(e) => handleArrayChange('interests', index, 'name', e.target.value)} />
+            <button type="button" onClick={() => setItemToDelete({ section: 'interests', id: interest.id })} className="mt-6 text-red-500 hover:text-red-700">&times;</button>
+          </div>
+        ))}
+        <button type="button" onClick={() => addArrayItem('interests')} style={{backgroundColor: accentColor}} className="w-full py-2 text-white font-semibold rounded-md hover:opacity-90 transition">+ Add Interest</button>
       </SectionWrapper>
 
       {itemToDelete && (

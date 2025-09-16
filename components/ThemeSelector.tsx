@@ -1,14 +1,97 @@
 
 import React from 'react';
-import type { Theme } from '../types';
+import type { Theme, ThemeSizing } from '../types';
 
 interface ThemeSelectorProps {
   themes: Theme[];
-  selectedTheme: string;
+  selectedTheme: Theme;
   setSelectedTheme: (name: string) => void;
+  onThemeUpdate: (theme: Theme) => void;
 }
 
-export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ themes, selectedTheme, setSelectedTheme }) => {
+const ColorPicker: React.FC<{
+  label: string;
+  color: string;
+  onChange: (color: string) => void;
+}> = ({ label, color, onChange }) => {
+  const id = `color-picker-${label.toLowerCase().replace(' ', '-')}`;
+  return (
+    <div className="flex items-center justify-between">
+      <label htmlFor={id} className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        {label}
+      </label>
+      <div className="relative flex items-center justify-center w-8 h-8">
+        <input
+          id={id}
+          type="color"
+          value={color}
+          onChange={(e) => onChange(e.target.value)}
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+        />
+        <div
+          className="w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600 pointer-events-none"
+          style={{ backgroundColor: color }}
+          aria-hidden="true"
+        ></div>
+      </div>
+    </div>
+  );
+};
+
+const SliderControl: React.FC<{
+    label: string;
+    value: number;
+    min: number;
+    max: number;
+    step: number;
+    onChange: (value: number) => void;
+}> = ({ label, value, min, max, step, onChange }) => (
+    <div>
+        <label className="flex justify-between text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <span>{label}</span>
+            <span>{value}</span>
+        </label>
+        <input
+            type="range"
+            min={min}
+            max={max}
+            step={step}
+            value={value}
+            onChange={(e) => onChange(parseFloat(e.target.value))}
+            className="w-full h-2 bg-gray-200 dark:bg-gray-600 rounded-lg appearance-none cursor-pointer"
+        />
+    </div>
+);
+
+export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ themes, selectedTheme, setSelectedTheme, onThemeUpdate }) => {
+  
+  const handleColorChange = (colorType: 'primary' | 'secondary' | 'accent', newColor: string) => {
+    const updatedTheme = {
+      ...selectedTheme,
+      colors: {
+        ...selectedTheme.colors,
+        [colorType]: newColor,
+      },
+    };
+    onThemeUpdate(updatedTheme);
+  };
+
+  const handleFontChange = (newFontValue: string) => {
+    const updatedTheme = { ...selectedTheme, font: newFontValue };
+    onThemeUpdate(updatedTheme);
+  };
+
+  const handleSizingChange = (field: keyof ThemeSizing, value: number) => {
+    const updatedTheme = {
+        ...selectedTheme,
+        sizing: {
+            ...selectedTheme.sizing,
+            [field]: value,
+        },
+    };
+    onThemeUpdate(updatedTheme);
+  };
+
   return (
     <div>
       <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-3">Choose a Theme</h3>
@@ -17,20 +100,91 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ themes, selectedTh
           <button
             key={theme.name}
             onClick={() => setSelectedTheme(theme.name)}
-            className={`p-2 rounded-lg border-2 transition-all duration-200 ${selectedTheme === theme.name ? 'border-blue-500 scale-105' : 'border-gray-200 dark:border-gray-600 hover:border-blue-400'}`}
+            className={`p-2 rounded-lg border-2 transition-all duration-200 ${selectedTheme.name === theme.name ? 'border-blue-500 scale-105' : 'border-gray-200 dark:border-gray-600 hover:border-blue-400'}`}
           >
             <div className="h-16 w-full flex flex-col justify-between p-2 rounded bg-white shadow-inner">
               <div className="flex items-center gap-1">
-                 <div className={`w-3 h-3 rounded-full ${theme.colors.accent}`}></div>
+                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: theme.colors.accent }}></div>
                  <div className="flex-1 h-1 bg-gray-300 rounded-full"></div>
               </div>
               <div className="flex-1 w-2/3 h-1 bg-gray-200 rounded-full mt-2"></div>
                <div className="flex-1 w-full h-1 bg-gray-200 rounded-full mt-1"></div>
             </div>
-            <p className={`mt-2 text-sm font-medium text-center ${selectedTheme === theme.name ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'}`}>{theme.name}</p>
+            <p className={`mt-2 text-sm font-medium text-center ${selectedTheme.name === theme.name ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'}`}>{theme.name}</p>
           </button>
         ))}
       </div>
+
+      {selectedTheme && (
+        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <h4 className="text-lg font-semibold text-gray-800 dark:text-white mb-3">Customize '{selectedTheme.name}'</h4>
+          <div className="space-y-4">
+            <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-3">
+                <h5 className="font-semibold text-gray-800 dark:text-white">Colors & Fonts</h5>
+                 <div>
+                    <label htmlFor="font-selector" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Font
+                    </label>
+                    <select
+                        id="font-selector"
+                        value={selectedTheme.font}
+                        onChange={(e) => handleFontChange(e.target.value)}
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    >
+                        {selectedTheme.fonts.map(font => (
+                            <option key={font.value} value={font.value}>
+                                {font.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <ColorPicker
+                label="Primary"
+                color={selectedTheme.colors.primary}
+                onChange={(newColor) => handleColorChange('primary', newColor)}
+                />
+                <ColorPicker
+                label="Secondary"
+                color={selectedTheme.colors.secondary}
+                onChange={(newColor) => handleColorChange('secondary', newColor)}
+                />
+                <ColorPicker
+                label="Accent"
+                color={selectedTheme.colors.accent}
+                onChange={(newColor) => handleColorChange('accent', newColor)}
+                />
+            </div>
+
+            <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-4">
+                <h5 className="font-semibold text-gray-800 dark:text-white">Layout & Sizing</h5>
+                <SliderControl 
+                    label="Base Font Size (px)"
+                    value={selectedTheme.sizing.baseFontSize}
+                    min={8}
+                    max={14}
+                    step={0.5}
+                    onChange={(value) => handleSizingChange('baseFontSize', value)}
+                />
+                <SliderControl 
+                    label="Heading Scale"
+                    value={selectedTheme.sizing.headingScale}
+                    min={1.0}
+                    max={1.5}
+                    step={0.05}
+                    onChange={(value) => handleSizingChange('headingScale', value)}
+                />
+                <SliderControl 
+                    label="Spacing"
+                    value={selectedTheme.sizing.spacing}
+                    min={0.8}
+                    max={1.4}
+                    step={0.05}
+                    onChange={(value) => handleSizingChange('spacing', value)}
+                />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
