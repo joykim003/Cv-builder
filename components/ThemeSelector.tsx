@@ -1,6 +1,6 @@
 
-import React from 'react';
-import type { Theme, ThemeSizing } from '../types';
+import React, { useState } from 'react';
+import type { Theme, ThemeSizing, SectionKey } from '../types';
 
 interface ThemeSelectorProps {
   themes: Theme[];
@@ -49,7 +49,7 @@ const SliderControl: React.FC<{
     <div>
         <label className="flex justify-between text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             <span>{label}</span>
-            <span>{value}</span>
+            <span>{value.toFixed(2)}</span>
         </label>
         <input
             type="range"
@@ -63,7 +63,23 @@ const SliderControl: React.FC<{
     </div>
 );
 
+const SIZING_SECTIONS: { key: SectionKey | 'global'; name: string }[] = [
+    { key: 'global', name: 'Global (All Sections)'},
+    { key: 'header', name: 'Header' },
+    { key: 'summary', name: 'Summary' },
+    { key: 'experience', name: 'Experience' },
+    { key: 'education', name: 'Education' },
+    { key: 'skills', name: 'Skills (Single Column)' },
+    { key: 'languages', name: 'Languages' },
+    { key: 'interests', name: 'Interests' },
+    { key: 'sidebarContact', name: 'Sidebar: Contact' },
+    { key: 'sidebarSkills', name: 'Sidebar: Skills' },
+    { key: 'sidebarLanguages', name: 'Sidebar: Languages' },
+    { key: 'sidebarInterests', name: 'Sidebar: Interests' },
+];
+
 export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ themes, selectedTheme, setSelectedTheme, onThemeUpdate }) => {
+  const [selectedSizingSection, setSelectedSizingSection] = useState<SectionKey | 'global'>('global');
   
   const handleColorChange = (colorType: 'primary' | 'secondary' | 'accent', newColor: string) => {
     const updatedTheme = {
@@ -82,15 +98,33 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ themes, selectedTh
   };
 
   const handleSizingChange = (field: keyof ThemeSizing, value: number) => {
-    const updatedTheme = {
-        ...selectedTheme,
-        sizing: {
-            ...selectedTheme.sizing,
-            [field]: value,
-        },
-    };
-    onThemeUpdate(updatedTheme);
+    if (selectedSizingSection === 'global') {
+        const updatedTheme = {
+            ...selectedTheme,
+            sizing: {
+                ...selectedTheme.sizing,
+                [field]: value,
+            },
+        };
+        onThemeUpdate(updatedTheme);
+    } else {
+        const updatedTheme = {
+            ...selectedTheme,
+            sectionSizing: {
+                ...selectedTheme.sectionSizing,
+                [selectedSizingSection]: {
+                    ...selectedTheme.sectionSizing?.[selectedSizingSection],
+                    [field]: value,
+                }
+            }
+        };
+        onThemeUpdate(updatedTheme);
+    }
   };
+
+  const currentSizing = selectedSizingSection === 'global' 
+    ? selectedTheme.sizing 
+    : { ...selectedTheme.sizing, ...selectedTheme.sectionSizing?.[selectedSizingSection] };
 
   return (
     <div>
@@ -99,7 +133,10 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ themes, selectedTh
         {themes.map(theme => (
           <button
             key={theme.name}
-            onClick={() => setSelectedTheme(theme.name)}
+            onClick={() => {
+                setSelectedTheme(theme.name);
+                setSelectedSizingSection('global');
+            }}
             className={`p-2 rounded-lg border-2 transition-all duration-200 ${selectedTheme.name === theme.name ? 'border-blue-500 scale-105' : 'border-gray-200 dark:border-gray-600 hover:border-blue-400'}`}
           >
             <div className="h-16 w-full flex flex-col justify-between p-2 rounded bg-white shadow-inner">
@@ -157,9 +194,26 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ themes, selectedTh
 
             <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-4">
                 <h5 className="font-semibold text-gray-800 dark:text-white">Layout & Sizing</h5>
+                 <div>
+                    <label htmlFor="sizing-section-selector" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Customize Section
+                    </label>
+                    <select
+                        id="sizing-section-selector"
+                        value={selectedSizingSection}
+                        onChange={(e) => setSelectedSizingSection(e.target.value as SectionKey | 'global')}
+                        className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    >
+                        {SIZING_SECTIONS.map(section => (
+                            <option key={section.key} value={section.key}>
+                                {section.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
                 <SliderControl 
                     label="Base Font Size (px)"
-                    value={selectedTheme.sizing.baseFontSize}
+                    value={currentSizing.baseFontSize}
                     min={8}
                     max={14}
                     step={0.5}
@@ -167,17 +221,17 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ themes, selectedTh
                 />
                 <SliderControl 
                     label="Heading Scale"
-                    value={selectedTheme.sizing.headingScale}
-                    min={1.0}
-                    max={1.5}
+                    value={currentSizing.headingScale}
+                    min={0.8}
+                    max={1.8}
                     step={0.05}
                     onChange={(value) => handleSizingChange('headingScale', value)}
                 />
                 <SliderControl 
                     label="Spacing"
-                    value={selectedTheme.sizing.spacing}
-                    min={0.8}
-                    max={1.4}
+                    value={currentSizing.spacing}
+                    min={0.7}
+                    max={1.5}
                     step={0.05}
                     onChange={(value) => handleSizingChange('spacing', value)}
                 />

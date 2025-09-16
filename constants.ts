@@ -97,7 +97,8 @@ export const THEMES: Theme[] = [
       baseFontSize: 10,
       headingScale: 1.1,
       spacing: 1.0,
-    }
+    },
+    sectionSizing: {}
   },
   {
     name: 'Classic Elegance',
@@ -120,7 +121,8 @@ export const THEMES: Theme[] = [
       baseFontSize: 10,
       headingScale: 1.0,
       spacing: 1.1,
-    }
+    },
+    sectionSizing: {}
   },
   {
     name: 'Creative Tech',
@@ -143,7 +145,8 @@ export const THEMES: Theme[] = [
       baseFontSize: 11,
       headingScale: 1.2,
       spacing: 1.0,
-    }
+    },
+    sectionSizing: {}
   },
     {
     name: 'Professional Deep Blue',
@@ -168,7 +171,8 @@ export const THEMES: Theme[] = [
       baseFontSize: 9.5,
       headingScale: 1.1,
       spacing: 1.0,
-    }
+    },
+    sectionSizing: {}
   },
   {
     name: 'Corporate Blue',
@@ -193,7 +197,8 @@ export const THEMES: Theme[] = [
       baseFontSize: 10.5,
       headingScale: 1.05,
       spacing: 1.0,
-    }
+    },
+    sectionSizing: {}
   },
   {
     name: 'Earthy Tones',
@@ -218,7 +223,8 @@ export const THEMES: Theme[] = [
       baseFontSize: 10,
       headingScale: 1.2,
       spacing: 1.1,
-    }
+    },
+    sectionSizing: {}
   },
   {
     name: 'Rounded Charm',
@@ -244,6 +250,7 @@ export const THEMES: Theme[] = [
       baseFontSize: 10,
       headingScale: 1.15,
       spacing: 1.0,
-    }
+    },
+    sectionSizing: {}
   }
 ];

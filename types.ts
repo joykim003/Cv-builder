@@ -61,6 +61,8 @@ export interface ThemeSizing {
   spacing: number;      // multiplier
 }
 
+export type SectionKey = 'header' | 'summary' | 'experience' | 'education' | 'skills' | 'languages' | 'interests' | 'sidebarContact' | 'sidebarSkills' | 'sidebarLanguages' | 'sidebarInterests';
+
 export interface Theme {
   name:string;
   font: string;
@@ -82,4 +84,5 @@ export interface Theme {
     borderRadius?: string;
   };
   sizing: ThemeSizing;
+  sectionSizing?: Partial<Record<SectionKey, Partial<ThemeSizing>>>;
 }

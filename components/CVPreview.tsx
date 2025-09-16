@@ -1,5 +1,5 @@
 import React from 'react';
-import type { CVData, Theme } from '../types';
+import type { CVData, Theme, SectionKey } from '../types';
 import { PhoneIcon, EmailIcon, LocationIcon, WebsiteIcon } from './Icons';
 
 interface CVPreviewProps {
@@ -26,25 +26,32 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, theme }) => {
   const { personalInfo, experience, education, skills, languages, interests } = data;
   const hasPhoto = !!personalInfo.photo;
 
-  // Sizing calculations
-  const { baseFontSize, headingScale, spacing } = theme.sizing;
-  const baseRem = baseFontSize; // in px, for the root element
+  const getSectionStyles = (sectionKey: SectionKey | 'global' = 'global') => {
+      const globalSizing = theme.sizing;
+      const sectionOverride = (sectionKey !== 'global' && theme.sectionSizing?.[sectionKey]) || {};
+      const { baseFontSize, headingScale, spacing } = { ...globalSizing, ...sectionOverride };
+      
+      const baseRem = baseFontSize;
 
-  const s = (multiplier: number) => `${multiplier * 0.25 * spacing}rem`;
+      const s = (multiplier: number) => `${multiplier * 0.25 * spacing}rem`;
 
-  // Font sizes in rem
-  const font = {
-    xs: `${0.75 * headingScale}rem`,
-    sm: `${0.875 * headingScale}rem`,
-    base: '1rem', // This will be `baseFontSize` due to root element styling
-    lg: `${1.125 * headingScale}rem`,
-    xl: `${1.25 * headingScale}rem`,
-    '2xl': `${1.5 * headingScale}rem`,
-    '3xl': `${1.875 * headingScale}rem`,
-    '4xl': `${2.25 * headingScale}rem`,
-    '5xl': `${3.0 * headingScale}rem`,
-    '6xl': `${3.75 * headingScale}rem`,
+      const font = {
+          xs: `${0.75 * headingScale}rem`,
+          sm: `${0.875 * headingScale}rem`,
+          base: '1rem',
+          lg: `${1.125 * headingScale}rem`,
+          xl: `${1.25 * headingScale}rem`,
+          '2xl': `${1.5 * headingScale}rem`,
+          '3xl': `${1.875 * headingScale}rem`,
+          '4xl': `${2.25 * headingScale}rem`,
+          '5xl': `${3.0 * headingScale}rem`,
+          '6xl': `${3.75 * headingScale}rem`,
+      };
+
+      return { baseRem, s, font };
   };
+
+  const globalStyles = getSectionStyles('global');
 
 
   if (theme.layout.style === 'two-column') {
@@ -53,16 +60,26 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, theme }) => {
     const isRounded = theme.name === 'Rounded Charm';
     const isDeepBlue = theme.name === 'Professional Deep Blue';
     
+    // Calculate styles for each section
+    const headerStyles = getSectionStyles('header');
+    const sidebarContactStyles = getSectionStyles('sidebarContact');
+    const sidebarSkillsStyles = getSectionStyles('sidebarSkills');
+    const sidebarLangsStyles = getSectionStyles('sidebarLanguages');
+    const sidebarInterestsStyles = getSectionStyles('sidebarInterests');
+    const summaryStyles = getSectionStyles('summary');
+    const experienceStyles = getSectionStyles('experience');
+    const educationStyles = getSectionStyles('education');
+
     if (isDeepBlue) {
         return (
-            <div className={`w-full h-full flex ${theme.font} overflow-hidden`} style={{backgroundColor: theme.colors.background, fontSize: `${baseRem}px`}}>
+            <div className={`w-full h-full flex ${theme.font} overflow-hidden`} style={{backgroundColor: theme.colors.background, fontSize: `${globalStyles.baseRem}px`}}>
                 {/* Sidebar */}
                 <aside 
                     className="w-[35%] h-full flex flex-col" 
-                    style={{ backgroundColor: theme.colors.sidebarBackground, color: theme.colors.sidebarText, padding: s(8), gap: s(6) }}
+                    style={{ backgroundColor: theme.colors.sidebarBackground, color: theme.colors.sidebarText, padding: globalStyles.s(8), gap: globalStyles.s(6) }}
                 >
                     {hasPhoto && (
-                        <div className="flex justify-center" style={{marginBottom: s(2)}}>
+                        <div className="flex justify-center" style={{marginBottom: globalStyles.s(2)}}>
                             <img 
                                 src={personalInfo.photo} 
                                 alt={personalInfo.name} 
@@ -73,20 +90,20 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, theme }) => {
                     )}
                     
                     <section>
-                        <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: font.sm, marginBottom: s(3)}}>Contact</h3>
-                        <div className="flex flex-col" style={{ gap: s(3), marginTop: s(2)}}>
-                           <ContactInfoItem icon={<PhoneIcon className="w-4 h-4" />} text={personalInfo.phone} color={theme.colors.sidebarText!} style={{fontSize: font.sm, gap: s(3)}}/>
-                           <ContactInfoItem icon={<EmailIcon className="w-4 h-4" />} text={personalInfo.email} color={theme.colors.sidebarText!} style={{fontSize: font.sm, gap: s(3)}}/>
-                           <ContactInfoItem icon={<WebsiteIcon className="w-4 h-4" />} text={personalInfo.website} color={theme.colors.sidebarText!} style={{fontSize: font.sm, gap: s(3)}}/>
-                           <ContactInfoItem icon={<LocationIcon className="w-4 h-4" />} text={personalInfo.location} color={theme.colors.sidebarText!} style={{fontSize: font.sm, gap: s(3)}}/>
+                        <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: sidebarContactStyles.font.sm, marginBottom: sidebarContactStyles.s(3)}}>Contact</h3>
+                        <div className="flex flex-col" style={{ gap: sidebarContactStyles.s(3), marginTop: sidebarContactStyles.s(2)}}>
+                           <ContactInfoItem icon={<PhoneIcon className="w-4 h-4" />} text={personalInfo.phone} color={theme.colors.sidebarText!} style={{fontSize: sidebarContactStyles.font.sm, gap: sidebarContactStyles.s(3)}}/>
+                           <ContactInfoItem icon={<EmailIcon className="w-4 h-4" />} text={personalInfo.email} color={theme.colors.sidebarText!} style={{fontSize: sidebarContactStyles.font.sm, gap: sidebarContactStyles.s(3)}}/>
+                           <ContactInfoItem icon={<WebsiteIcon className="w-4 h-4" />} text={personalInfo.website} color={theme.colors.sidebarText!} style={{fontSize: sidebarContactStyles.font.sm, gap: sidebarContactStyles.s(3)}}/>
+                           <ContactInfoItem icon={<LocationIcon className="w-4 h-4" />} text={personalInfo.location} color={theme.colors.sidebarText!} style={{fontSize: sidebarContactStyles.font.sm, gap: sidebarContactStyles.s(3)}}/>
                         </div>
                     </section>
 
                     <section>
-                       <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: font.sm, marginBottom: s(3)}}>Languages</h3>
-                       <div className="flex flex-col" style={{gap: s(1), marginTop: s(2)}}>
+                       <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: sidebarLangsStyles.font.sm, marginBottom: sidebarLangsStyles.s(3)}}>Languages</h3>
+                       <div className="flex flex-col" style={{gap: sidebarLangsStyles.s(1), marginTop: sidebarLangsStyles.s(2)}}>
                          {languages.map(lang => (
-                           lang.name && <div key={lang.id} style={{fontSize: font.sm}}>
+                           lang.name && <div key={lang.id} style={{fontSize: sidebarLangsStyles.font.sm}}>
                              <span>{lang.name}</span>
                              {lang.level && <span className="text-gray-600"> – {lang.level}</span>}
                            </div>
@@ -95,8 +112,8 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, theme }) => {
                     </section>
                     
                     <section>
-                       <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: font.sm, marginBottom: s(3)}}>Skills</h3>
-                       <ul className="list-disc list-inside flex flex-col" style={{marginTop: s(2), gap: s(1), fontSize: font.sm}}>
+                       <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: sidebarSkillsStyles.font.sm, marginBottom: sidebarSkillsStyles.s(3)}}>Skills</h3>
+                       <ul className="list-disc list-inside flex flex-col" style={{marginTop: sidebarSkillsStyles.s(2), gap: sidebarSkillsStyles.s(1), fontSize: sidebarSkillsStyles.font.sm}}>
                          {skills.map(skill => (
                            skill.name && <li key={skill.id}>{skill.name}</li>
                          ))}
@@ -104,8 +121,8 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, theme }) => {
                     </section>
 
                     <section>
-                       <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: font.sm, marginBottom: s(3)}}>Interests</h3>
-                       <div className="flex flex-col" style={{gap: s(1), marginTop: s(2), fontSize: font.sm}}>
+                       <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: sidebarInterestsStyles.font.sm, marginBottom: sidebarInterestsStyles.s(3)}}>Interests</h3>
+                       <div className="flex flex-col" style={{gap: sidebarInterestsStyles.s(1), marginTop: sidebarInterestsStyles.s(2), fontSize: sidebarInterestsStyles.font.sm}}>
                          {interests.map(interest => (
                            interest.name && <p key={interest.id}>{interest.name}</p>
                          ))}
@@ -114,40 +131,40 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, theme }) => {
                 </aside>
 
                 {/* Main Content */}
-                <main className="w-[65%] h-full relative" style={{ color: theme.colors.text, padding: s(10) }}>
+                <main className="w-[65%] h-full relative" style={{ color: theme.colors.text, padding: globalStyles.s(10) }}>
                     <div className="absolute top-0 right-8 h-36 w-16 rounded-b-full" style={{backgroundColor: theme.colors.primary}}></div>
 
-                    <header style={{marginBottom: s(8), marginTop: s(12)}}>
-                        <h1 className="font-bold uppercase tracking-wider" style={{ color: theme.colors.primary, fontSize: font['4xl'] }}>{personalInfo.name || "Your Name"}</h1>
-                        <h2 style={{ color: theme.colors.secondary, fontSize: font.xl, marginTop: s(1) }}>{personalInfo.title || "Your Title"}</h2>
+                    <header style={{marginBottom: headerStyles.s(8), marginTop: headerStyles.s(12)}}>
+                        <h1 className="font-bold uppercase tracking-wider" style={{ color: theme.colors.primary, fontSize: headerStyles.font['4xl'] }}>{personalInfo.name || "Your Name"}</h1>
+                        <h2 style={{ color: theme.colors.secondary, fontSize: headerStyles.font.xl, marginTop: headerStyles.s(1) }}>{personalInfo.title || "Your Title"}</h2>
                     </header>
                     
-                    <section style={{marginTop: s(8)}}>
-                      <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: font.sm, marginBottom: s(3)}}>Education</h3>
-                      <div className="flex flex-col" style={{gap: s(4)}}>
+                    <section style={{marginTop: educationStyles.s(8)}}>
+                      <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: educationStyles.font.sm, marginBottom: educationStyles.s(3)}}>Education</h3>
+                      <div className="flex flex-col" style={{gap: educationStyles.s(4)}}>
                         {education.map(edu => (
                           <div key={edu.id}>
                             <div className="flex justify-between items-baseline">
-                              <h4 className="font-semibold" style={{ color: theme.colors.text, fontSize: font.lg }}>{edu.degree}</h4>
-                              <p className="font-medium" style={{ color: theme.colors.textSecondary, fontSize: font.sm }}>{edu.startDate} - {edu.endDate}</p>
+                              <h4 className="font-semibold" style={{ color: theme.colors.text, fontSize: educationStyles.font.lg }}>{edu.degree}</h4>
+                              <p className="font-medium" style={{ color: theme.colors.textSecondary, fontSize: educationStyles.font.sm }}>{edu.startDate} - {edu.endDate}</p>
                             </div>
-                            <p className="font-medium" style={{ color: theme.colors.secondary, fontSize: font.base }}>{edu.institution}</p>
+                            <p className="font-medium" style={{ color: theme.colors.secondary, fontSize: educationStyles.font.base }}>{edu.institution}</p>
                           </div>
                         ))}
                       </div>
                     </section>
 
-                    <section style={{marginTop: s(8)}}>
-                      <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: font.sm, marginBottom: s(3)}}>Professional Experience</h3>
-                       <div className="flex flex-col" style={{gap: s(5)}}>
+                    <section style={{marginTop: experienceStyles.s(8)}}>
+                      <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: experienceStyles.font.sm, marginBottom: experienceStyles.s(3)}}>Professional Experience</h3>
+                       <div className="flex flex-col" style={{gap: experienceStyles.s(5)}}>
                         {experience.map((exp) => (
                           <div key={exp.id}>
                             <div className="flex justify-between items-baseline">
-                              <h4 className="font-semibold" style={{ color: theme.colors.text, fontSize: font.lg }}>{exp.role}</h4>
-                              <p className="font-medium" style={{ color: theme.colors.textSecondary, fontSize: font.sm }}>{exp.startDate} - {exp.endDate}</p>
+                              <h4 className="font-semibold" style={{ color: theme.colors.text, fontSize: experienceStyles.font.lg }}>{exp.role}</h4>
+                              <p className="font-medium" style={{ color: theme.colors.textSecondary, fontSize: experienceStyles.font.sm }}>{exp.startDate} - {exp.endDate}</p>
                             </div>
-                            <p className="font-medium" style={{ color: theme.colors.secondary, fontSize: font.base }}>{exp.company}</p>
-                            <div className="flex flex-col" style={{marginTop: s(2), gap: s(1)}}>{renderDescription(exp.description, {fontSize: font.sm})}</div>
+                            <p className="font-medium" style={{ color: theme.colors.secondary, fontSize: experienceStyles.font.base }}>{exp.company}</p>
+                            <div className="flex flex-col" style={{marginTop: experienceStyles.s(2), gap: experienceStyles.s(1)}}>{renderDescription(exp.description, {fontSize: experienceStyles.font.sm})}</div>
                           </div>
                         ))}
                       </div>
@@ -168,11 +185,11 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, theme }) => {
     }
 
     return (
-        <div className={`w-full h-full flex ${theme.font} ${isRounded ? 'shadow-lg' : ''}`} style={{backgroundColor: theme.colors.background, fontSize: `${baseRem}px`}}>
+        <div className={`w-full h-full flex ${theme.font} ${isRounded ? 'shadow-lg' : ''}`} style={{backgroundColor: theme.colors.background, fontSize: `${globalStyles.baseRem}px`}}>
             {/* Sidebar */}
             <aside 
                 className={`w-[38%] h-full p-8 flex flex-col ${sidebarBorderRadius}`} 
-                style={{ backgroundColor: theme.colors.sidebarBackground, color: theme.colors.sidebarText, padding: s(8), gap: s(8) }}
+                style={{ backgroundColor: theme.colors.sidebarBackground, color: theme.colors.sidebarText, padding: globalStyles.s(8), gap: globalStyles.s(8) }}
             >
                 {hasPhoto && (
                     <div className="flex justify-center">
@@ -186,77 +203,77 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, theme }) => {
                 )}
                 
                 <section>
-                    <h3 className={theme.layout.sectionTitleStyle} style={{color: isCorporate ? theme.colors.sidebarText : theme.colors.accent, fontSize: font.lg, marginBottom: s(4)}}>Contact</h3>
-                    {isRounded && <div className="h-0.5 w-10" style={{backgroundColor: theme.colors.accent, marginBottom: s(3)}}></div>}
-                    <div className="flex flex-col" style={{gap: s(3)}}>
-                       <ContactInfoItem icon={<PhoneIcon className="w-4 h-4" />} text={personalInfo.phone} color={theme.colors.sidebarText!} style={{fontSize: font.sm, gap: s(3)}} />
-                       <ContactInfoItem icon={<EmailIcon className="w-4 h-4" />} text={personalInfo.email} color={theme.colors.sidebarText!} style={{fontSize: font.sm, gap: s(3)}} />
-                       <ContactInfoItem icon={<LocationIcon className="w-4 h-4" />} text={personalInfo.location} color={theme.colors.sidebarText!} style={{fontSize: font.sm, gap: s(3)}} />
-                       <ContactInfoItem icon={<WebsiteIcon className="w-4 h-4" />} text={personalInfo.website} color={theme.colors.sidebarText!} style={{fontSize: font.sm, gap: s(3)}} />
+                    <h3 className={theme.layout.sectionTitleStyle} style={{color: isCorporate ? theme.colors.sidebarText : theme.colors.accent, fontSize: sidebarContactStyles.font.lg, marginBottom: sidebarContactStyles.s(4)}}>Contact</h3>
+                    {isRounded && <div className="h-0.5 w-10" style={{backgroundColor: theme.colors.accent, marginBottom: sidebarContactStyles.s(3)}}></div>}
+                    <div className="flex flex-col" style={{gap: sidebarContactStyles.s(3)}}>
+                       <ContactInfoItem icon={<PhoneIcon className="w-4 h-4" />} text={personalInfo.phone} color={theme.colors.sidebarText!} style={{fontSize: sidebarContactStyles.font.sm, gap: sidebarContactStyles.s(3)}} />
+                       <ContactInfoItem icon={<EmailIcon className="w-4 h-4" />} text={personalInfo.email} color={theme.colors.sidebarText!} style={{fontSize: sidebarContactStyles.font.sm, gap: sidebarContactStyles.s(3)}} />
+                       <ContactInfoItem icon={<LocationIcon className="w-4 h-4" />} text={personalInfo.location} color={theme.colors.sidebarText!} style={{fontSize: sidebarContactStyles.font.sm, gap: sidebarContactStyles.s(3)}} />
+                       <ContactInfoItem icon={<WebsiteIcon className="w-4 h-4" />} text={personalInfo.website} color={theme.colors.sidebarText!} style={{fontSize: sidebarContactStyles.font.sm, gap: sidebarContactStyles.s(3)}} />
                     </div>
                 </section>
                 
                 <section>
-                   <h3 className={theme.layout.sectionTitleStyle} style={{color: isCorporate ? theme.colors.sidebarText : theme.colors.accent, fontSize: font.lg, marginBottom: s(4)}}>Skills</h3>
-                   {isRounded && <div className="h-0.5 w-10" style={{backgroundColor: theme.colors.accent, marginBottom: s(3)}}></div>}
-                   <div className="flex flex-wrap" style={{gap: s(2)}}>
+                   <h3 className={theme.layout.sectionTitleStyle} style={{color: isCorporate ? theme.colors.sidebarText : theme.colors.accent, fontSize: sidebarSkillsStyles.font.lg, marginBottom: sidebarSkillsStyles.s(4)}}>Skills</h3>
+                   {isRounded && <div className="h-0.5 w-10" style={{backgroundColor: theme.colors.accent, marginBottom: sidebarSkillsStyles.s(3)}}></div>}
+                   <div className="flex flex-wrap" style={{gap: sidebarSkillsStyles.s(2)}}>
                      {skills.map(skill => (
-                       skill.name && <span key={skill.id} className="rounded-full" style={{backgroundColor: theme.colors.accent, color: (isCorporate || isRounded) ? '#fff' : theme.colors.sidebarText, fontSize: font.xs, padding: `${s(1)} ${s(3)}`}}>{skill.name}</span>
+                       skill.name && <span key={skill.id} className="rounded-full inline-flex items-center" style={{backgroundColor: theme.colors.accent, color: (isCorporate || isRounded) ? '#fff' : theme.colors.sidebarText, fontSize: sidebarSkillsStyles.font.xs, padding: `${sidebarSkillsStyles.s(1)} ${sidebarSkillsStyles.s(3)}`}}>{skill.name}</span>
                      ))}
                    </div>
                 </section>
             </aside>
 
             {/* Main Content */}
-            <main className={`w-[62%] h-full ${mainContentBorderRadius}`} style={{ color: theme.colors.text, padding: s(10) }}>
-                <header style={{marginBottom: s(8)}}>
-                    <h1 className={`font-bold ${isEarthy ? '[font-family:Lora,serif]' : ''}`} style={{ color: theme.colors.primary, fontSize: isEarthy ? font['6xl'] : font['5xl'] }}>{personalInfo.name || "Your Name"}</h1>
-                    <h2 style={{ color: theme.colors.secondary, fontSize: font['2xl'], marginTop: s(1) }}>{personalInfo.title || "Your Title"}</h2>
+            <main className={`w-[62%] h-full ${mainContentBorderRadius}`} style={{ color: theme.colors.text, padding: globalStyles.s(10) }}>
+                <header style={{marginBottom: headerStyles.s(8)}}>
+                    <h1 className={`font-bold ${isEarthy ? '[font-family:Lora,serif]' : ''}`} style={{ color: theme.colors.primary, fontSize: isEarthy ? headerStyles.font['6xl'] : headerStyles.font['5xl'] }}>{personalInfo.name || "Your Name"}</h1>
+                    <h2 style={{ color: theme.colors.secondary, fontSize: headerStyles.font['2xl'], marginTop: headerStyles.s(1) }}>{personalInfo.title || "Your Title"}</h2>
                 </header>
                 
                 <section>
-                    <p className="leading-relaxed" style={{fontSize: font.sm}}>{personalInfo.summary}</p>
+                    <p className="leading-relaxed" style={{fontSize: summaryStyles.font.sm}}>{personalInfo.summary}</p>
                 </section>
 
-                <section style={{marginTop: s(6)}}>
-                  <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: font.xl, marginBottom: s(4)}}>
+                <section style={{marginTop: experienceStyles.s(6)}}>
+                  <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: experienceStyles.font.xl, marginBottom: experienceStyles.s(4)}}>
                     <span style={{backgroundColor: isEarthy ? theme.colors.accent : 'transparent', color: isEarthy ? theme.colors.sidebarText : theme.colors.primary}} className={isEarthy ? 'px-3 py-1' : ''}>
                         Experience
                     </span>
                   </h3>
-                  {isRounded && <div className="h-0.5 w-10" style={{backgroundColor: theme.colors.accent, marginBottom: s(3)}}></div>}
-                  <div className={`flex flex-col relative ${isCorporate ? 'border-l-2 pl-6' : ''}`} style={{gap: s(5), borderColor: theme.colors.accent + '50', paddingLeft: isCorporate ? s(6) : '0'}}>
+                  {isRounded && <div className="h-0.5 w-10" style={{backgroundColor: theme.colors.accent, marginBottom: experienceStyles.s(3)}}></div>}
+                  <div className={`flex flex-col relative ${isCorporate ? 'border-l-2 pl-6' : ''}`} style={{gap: experienceStyles.s(5), borderColor: theme.colors.accent + '50', paddingLeft: isCorporate ? experienceStyles.s(6) : '0'}}>
                     {experience.map((exp, index) => (
                       <div key={exp.id} className={isCorporate ? 'relative' : ''}>
-                        {isCorporate && <div className="absolute top-1 w-3 h-3 rounded-full" style={{backgroundColor: theme.colors.accent, left: `-${s(6)} - 5px`}}></div>}
+                        {isCorporate && <div className="absolute top-1 w-3 h-3 rounded-full" style={{backgroundColor: theme.colors.accent, left: `-${experienceStyles.s(6)} - 5px`}}></div>}
                         <div className="flex justify-between items-baseline">
-                          <h4 className="font-semibold" style={{ color: theme.colors.primary, fontSize: font.lg }}>{exp.role}</h4>
-                          <p className="font-medium" style={{ color: theme.colors.textSecondary, fontSize: font.sm }}>{exp.startDate} - {exp.endDate}</p>
+                          <h4 className="font-semibold" style={{ color: theme.colors.primary, fontSize: experienceStyles.font.lg }}>{exp.role}</h4>
+                          <p className="font-medium" style={{ color: theme.colors.textSecondary, fontSize: experienceStyles.font.sm }}>{exp.startDate} - {exp.endDate}</p>
                         </div>
-                        <p className="font-medium" style={{ color: theme.colors.secondary, fontSize: font.base }}>{exp.company}</p>
-                        <div className="flex flex-col" style={{marginTop: s(2), gap: s(1)}}>{renderDescription(exp.description, {fontSize: font.base})}</div>
+                        <p className="font-medium" style={{ color: theme.colors.secondary, fontSize: experienceStyles.font.base }}>{exp.company}</p>
+                        <div className="flex flex-col" style={{marginTop: experienceStyles.s(2), gap: experienceStyles.s(1)}}>{renderDescription(exp.description, {fontSize: experienceStyles.font.base})}</div>
                       </div>
                     ))}
                   </div>
                 </section>
 
-                <section style={{marginTop: s(6)}}>
-                  <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: font.xl, marginBottom: s(4)}}>
+                <section style={{marginTop: educationStyles.s(6)}}>
+                  <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: educationStyles.font.xl, marginBottom: educationStyles.s(4)}}>
                     <span style={{backgroundColor: isEarthy ? theme.colors.accent : 'transparent', color: isEarthy ? theme.colors.sidebarText : theme.colors.primary}} className={isEarthy ? 'px-3 py-1' : ''}>
                         Education
                     </span>
                   </h3>
-                   {isRounded && <div className="h-0.5 w-10" style={{backgroundColor: theme.colors.accent, marginBottom: s(3)}}></div>}
-                   <div className={`flex flex-col relative ${isCorporate ? 'border-l-2' : ''}`} style={{gap: s(4), borderColor: theme.colors.accent + '50', paddingLeft: isCorporate ? s(6) : '0'}}>
+                   {isRounded && <div className="h-0.5 w-10" style={{backgroundColor: theme.colors.accent, marginBottom: educationStyles.s(3)}}></div>}
+                   <div className={`flex flex-col relative ${isCorporate ? 'border-l-2' : ''}`} style={{gap: educationStyles.s(4), borderColor: theme.colors.accent + '50', paddingLeft: isCorporate ? educationStyles.s(6) : '0'}}>
                     {education.map(edu => (
                       <div key={edu.id} className={isCorporate ? 'relative' : ''}>
-                        {isCorporate && <div className="absolute top-1 w-3 h-3 rounded-full" style={{backgroundColor: theme.colors.accent, left: `-${s(6)} - 5px`}}></div>}
+                        {isCorporate && <div className="absolute top-1 w-3 h-3 rounded-full" style={{backgroundColor: theme.colors.accent, left: `-${educationStyles.s(6)} - 5px`}}></div>}
                         <div className="flex justify-between items-baseline">
-                          <h4 className="font-semibold" style={{ color: theme.colors.primary, fontSize: font.lg }}>{edu.degree}</h4>
-                          <p className="font-medium" style={{ color: theme.colors.textSecondary, fontSize: font.sm }}>{edu.startDate} - {edu.endDate}</p>
+                          <h4 className="font-semibold" style={{ color: theme.colors.primary, fontSize: educationStyles.font.lg }}>{edu.degree}</h4>
+                          <p className="font-medium" style={{ color: theme.colors.textSecondary, fontSize: educationStyles.font.sm }}>{edu.startDate} - {edu.endDate}</p>
                         </div>
-                        <p className="font-medium" style={{ color: theme.colors.secondary, fontSize: font.base }}>{edu.institution}</p>
-                        <div className="flex flex-col" style={{marginTop: s(1), gap: s(1)}}>{renderDescription(edu.description, {fontSize: font.base})}</div>
+                        <p className="font-medium" style={{ color: theme.colors.secondary, fontSize: educationStyles.font.base }}>{edu.institution}</p>
+                        <div className="flex flex-col" style={{marginTop: educationStyles.s(1), gap: educationStyles.s(1)}}>{renderDescription(edu.description, {fontSize: educationStyles.font.base})}</div>
                       </div>
                     ))}
                   </div>
@@ -267,8 +284,16 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, theme }) => {
   }
 
   // Fallback to single column layout for existing themes
+  const headerStyles = getSectionStyles('header');
+  const summaryStyles = getSectionStyles('summary');
+  const experienceStyles = getSectionStyles('experience');
+  const educationStyles = getSectionStyles('education');
+  const skillsStyles = getSectionStyles('skills');
+  
   const isCentered = theme.layout.headerAlignment === 'text-center';
-  const sectionTitleStyles: React.CSSProperties = React.useMemo(() => {
+  const getSingleColSectionTitleStyles = (section: 'summary' | 'experience' | 'education' | 'skills'): React.CSSProperties => {
+    const s = getSectionStyles(section).s;
+    const font = getSectionStyles(section).font;
     let styles: React.CSSProperties = { fontSize: font.xl, marginBottom: s(4), paddingBottom: s(1) };
     switch (theme.name) {
       case 'Modern Professional':
@@ -280,71 +305,71 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, theme }) => {
       default:
         return { ...styles, color: theme.colors.secondary, borderBottom: `2px solid ${theme.colors.secondary}40` };
     }
-  }, [theme, font, s]);
+  };
 
   return (
-    <div id="cv-render-content" className={`w-full h-full ${theme.font}`} style={{ backgroundColor: theme.colors.background, fontSize: `${baseRem}px`, padding: s(10) }}>
-      <header className={`flex ${isCentered ? 'flex-col items-center' : 'flex-row items-center'}`} style={{ marginBottom: s(8), gap: s(8) }}>
+    <div id="cv-render-content" className={`w-full h-full ${theme.font}`} style={{ backgroundColor: theme.colors.background, fontSize: `${globalStyles.baseRem}px`, padding: globalStyles.s(10) }}>
+      <header className={`flex ${isCentered ? 'flex-col items-center' : 'flex-row items-center'}`} style={{ marginBottom: headerStyles.s(8), gap: headerStyles.s(8) }}>
         {hasPhoto && (
             <div className={`flex-shrink-0 ${isCentered ? 'mb-4' : ''}`}>
                 <img src={personalInfo.photo} alt={personalInfo.name} className="w-28 h-28 rounded-full object-cover border-4" style={{borderColor: theme.colors.accent + '50'}} />
             </div>
         )}
         <div className={`${theme.layout.headerAlignment} flex-grow`}>
-            <h1 className="font-bold" style={{ color: theme.colors.primary, fontSize: font['5xl'] }}>{personalInfo.name || "Your Name"}</h1>
-            <h2 style={{ color: theme.colors.secondary, fontSize: font['2xl'], marginTop: s(1) }}>{personalInfo.title || "Your Title"}</h2>
-            <div className={`flex items-center flex-wrap ${isCentered ? 'justify-center' : ''}`} style={{ marginTop: s(4), gap: `${s(2)} ${s(6)}` }}>
-                <ContactInfoItem icon={<PhoneIcon className="w-4 h-4" />} text={personalInfo.phone} color={theme.colors.textSecondary} style={{fontSize: font.sm, gap: s(2)}}/>
-                <ContactInfoItem icon={<EmailIcon className="w-4 h-4" />} text={personalInfo.email} color={theme.colors.textSecondary} style={{fontSize: font.sm, gap: s(2)}}/>
-                <ContactInfoItem icon={<LocationIcon className="w-4 h-4" />} text={personalInfo.location} color={theme.colors.textSecondary} style={{fontSize: font.sm, gap: s(2)}}/>
-                <ContactInfoItem icon={<WebsiteIcon className="w-4 h-4" />} text={personalInfo.website} color={theme.colors.textSecondary} style={{fontSize: font.sm, gap: s(2)}}/>
+            <h1 className="font-bold" style={{ color: theme.colors.primary, fontSize: headerStyles.font['5xl'] }}>{personalInfo.name || "Your Name"}</h1>
+            <h2 style={{ color: theme.colors.secondary, fontSize: headerStyles.font['2xl'], marginTop: headerStyles.s(1) }}>{personalInfo.title || "Your Title"}</h2>
+            <div className={`flex items-center flex-wrap ${isCentered ? 'justify-center' : ''}`} style={{ marginTop: headerStyles.s(4), gap: `${headerStyles.s(2)} ${headerStyles.s(6)}` }}>
+                <ContactInfoItem icon={<PhoneIcon className="w-4 h-4" />} text={personalInfo.phone} color={theme.colors.textSecondary} style={{fontSize: headerStyles.font.sm, gap: headerStyles.s(2)}}/>
+                <ContactInfoItem icon={<EmailIcon className="w-4 h-4" />} text={personalInfo.email} color={theme.colors.textSecondary} style={{fontSize: headerStyles.font.sm, gap: headerStyles.s(2)}}/>
+                <ContactInfoItem icon={<LocationIcon className="w-4 h-4" />} text={personalInfo.location} color={theme.colors.textSecondary} style={{fontSize: headerStyles.font.sm, gap: headerStyles.s(2)}}/>
+                <ContactInfoItem icon={<WebsiteIcon className="w-4 h-4" />} text={personalInfo.website} color={theme.colors.textSecondary} style={{fontSize: headerStyles.font.sm, gap: headerStyles.s(2)}}/>
             </div>
         </div>
       </header>
 
-      <main style={{ color: theme.colors.text, fontSize: font.base }}>
+      <main style={{ color: theme.colors.text, fontSize: globalStyles.font.base }}>
         <section>
-          <h3 style={sectionTitleStyles}>Summary</h3>
-          <p className="leading-relaxed" style={{fontSize: font.sm}}>{personalInfo.summary}</p>
+          <h3 style={getSingleColSectionTitleStyles('summary')}>Summary</h3>
+          <p className="leading-relaxed" style={{fontSize: summaryStyles.font.sm}}>{personalInfo.summary}</p>
         </section>
 
-        <section style={{marginTop: s(6)}}>
-          <h3 style={sectionTitleStyles}>Experience</h3>
-          <div className="flex flex-col" style={{gap: s(5)}}>
+        <section style={{marginTop: experienceStyles.s(6)}}>
+          <h3 style={getSingleColSectionTitleStyles('experience')}>Experience</h3>
+          <div className="flex flex-col" style={{gap: experienceStyles.s(5)}}>
             {experience.map(exp => (
               <div key={exp.id}>
                 <div className="flex justify-between items-baseline">
-                  <h4 className="font-semibold" style={{ color: theme.colors.primary, fontSize: font.lg }}>{exp.role}</h4>
-                  <p className="font-medium" style={{ color: theme.colors.textSecondary, fontSize: font.sm }}>{exp.startDate} - {exp.endDate}</p>
+                  <h4 className="font-semibold" style={{ color: theme.colors.primary, fontSize: experienceStyles.font.lg }}>{exp.role}</h4>
+                  <p className="font-medium" style={{ color: theme.colors.textSecondary, fontSize: experienceStyles.font.sm }}>{exp.startDate} - {exp.endDate}</p>
                 </div>
-                <p className="font-medium italic" style={{ color: theme.colors.secondary, fontSize: font.base }}>{exp.company}</p>
-                <div className="flex flex-col" style={{marginTop: s(2), gap: s(1)}}>{renderDescription(exp.description, {fontSize: font.base})}</div>
+                <p className="font-medium italic" style={{ color: theme.colors.secondary, fontSize: experienceStyles.font.base }}>{exp.company}</p>
+                <div className="flex flex-col" style={{marginTop: experienceStyles.s(2), gap: experienceStyles.s(1)}}>{renderDescription(exp.description, {fontSize: experienceStyles.font.base})}</div>
               </div>
             ))}
           </div>
         </section>
 
-        <section style={{marginTop: s(6)}}>
-          <h3 style={sectionTitleStyles}>Education</h3>
-          <div className="flex flex-col" style={{gap: s(4)}}>
+        <section style={{marginTop: educationStyles.s(6)}}>
+          <h3 style={getSingleColSectionTitleStyles('education')}>Education</h3>
+          <div className="flex flex-col" style={{gap: educationStyles.s(4)}}>
             {education.map(edu => (
               <div key={edu.id}>
                 <div className="flex justify-between items-baseline">
-                  <h4 className="font-semibold" style={{ color: theme.colors.primary, fontSize: font.lg }}>{edu.degree}</h4>
-                  <p className="font-medium" style={{ color: theme.colors.textSecondary, fontSize: font.sm }}>{edu.startDate} - {edu.endDate}</p>
+                  <h4 className="font-semibold" style={{ color: theme.colors.primary, fontSize: educationStyles.font.lg }}>{edu.degree}</h4>
+                  <p className="font-medium" style={{ color: theme.colors.textSecondary, fontSize: educationStyles.font.sm }}>{edu.startDate} - {edu.endDate}</p>
                 </div>
-                <p className="font-medium italic" style={{ color: theme.colors.secondary, fontSize: font.base }}>{edu.institution}</p>
-                <div className="flex flex-col" style={{marginTop: s(1), gap: s(1)}}>{renderDescription(edu.description, {fontSize: font.base})}</div>
+                <p className="font-medium italic" style={{ color: theme.colors.secondary, fontSize: educationStyles.font.base }}>{edu.institution}</p>
+                <div className="flex flex-col" style={{marginTop: educationStyles.s(1), gap: educationStyles.s(1)}}>{renderDescription(edu.description, {fontSize: educationStyles.font.base})}</div>
               </div>
             ))}
           </div>
         </section>
 
-        <section style={{marginTop: s(6)}}>
-          <h3 style={sectionTitleStyles}>Skills</h3>
-          <div className="flex flex-wrap" style={{gap: s(2)}}>
+        <section style={{marginTop: skillsStyles.s(6)}}>
+          <h3 style={getSingleColSectionTitleStyles('skills')}>Skills</h3>
+          <div className="flex flex-wrap" style={{gap: skillsStyles.s(2)}}>
             {skills.map(skill => (
-              skill.name && <span key={skill.id} className="text-white rounded-full" style={{backgroundColor: theme.colors.accent, fontSize: font.sm, padding: `${s(1)} ${s(3)}`}}>{skill.name}</span>
+              skill.name && <span key={skill.id} className="text-white rounded-full inline-flex items-center" style={{backgroundColor: theme.colors.accent, fontSize: skillsStyles.font.sm, padding: `${skillsStyles.s(1)} ${skillsStyles.s(3)}`}}>{skill.name}</span>
             ))}
           </div>
         </section>
