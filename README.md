@@ -1,11 +1,48 @@
-<div align="center">
+# AI CV Crafter
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+A beautiful, real-time CV template generator. Choose from multiple professional themes, edit your details, and download a print-ready CV in seconds. This application is designed for modern job seekers to create stunning resumes with ease.
 
-  <h1>Built with AI Studio</h2>
+## ✨ Key Features
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+-   **Live Preview:** See your CV update in real-time as you type.
+-   **Multiple Themes:** Choose from a selection of professionally designed templates (`Modern Professional`, `Classic Elegance`, `Creative Tech`).
+-   **Comprehensive Editing:** Easily add, edit, and delete sections for:
+    -   Personal Information & Profile Photo
+    -   Work Experience
+    -   Education
+    -   Skills
+-   **Download as PDF:** Generate a high-quality, print-ready A4 PDF of your final CV with a single click.
+-   **Responsive Design:** Works seamlessly on both desktop and mobile devices.
+-   **Safe Deletion:** A confirmation dialog prevents accidental removal of your important entries.
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+## 🚀 Tech Stack
 
-</div>
+-   **Frontend:** [React](https://reactjs.org/) with [TypeScript](https://www.typescriptlang.org/)
+-   **Styling:** [Tailwind CSS](https://tailwindcss.com/) for a utility-first styling approach.
+-   **PDF Generation:** [jsPDF](https://github.com/parallax/jsPDF) and [html2canvas](https://html2canvas.hertzen.com/) to convert the live preview into a downloadable PDF.
+-   **Unique IDs:** [uuid](https://github.com/uuidjs/uuid) for generating unique keys for dynamic list items.
+
+## Usage
+
+1.  **Fill in your details:** Start by entering your personal information in the form on the left.
+2.  **Add your experience:** Fill out the sections for Work Experience, Education, and Skills. Use the `+ Add` buttons to create new entries.
+3.  **Upload a photo:** Personalize your CV by uploading a professional profile picture.
+4.  **Choose a theme:** Select a theme from the options at the top to instantly change the look and feel of your CV.
+5.  **Download:** Once you are happy with the preview, click the **Download PDF** button to save a high-quality version to your device.
+
+## File Structure
+
+```
+.
+├── index.html          # Main HTML entry point
+├── index.tsx           # React app bootstrap
+├── App.tsx             # Main application component, manages state and layout
+├── types.ts            # TypeScript type definitions for data structures
+├── constants.ts        # Initial CV data and theme configurations
+├── metadata.json       # Application metadata
+└── components/
+    ├── CVForm.tsx      # The main form for user input
+    ├── CVPreview.tsx   # Renders the live CV preview
+    ├── ThemeSelector.tsx # Component for choosing a theme
+    └── Icons.tsx       # SVG icon components
+```
