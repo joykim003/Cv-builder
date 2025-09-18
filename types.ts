@@ -62,25 +62,30 @@ export interface ThemeSizing {
 }
 
 export type SectionKey = 'header' | 'summary' | 'experience' | 'education' | 'skills' | 'languages' | 'interests' | 'sidebarContact' | 'sidebarSkills' | 'sidebarLanguages' | 'sidebarInterests';
+export type ReorderableSectionKey = 'summary' | 'experience' | 'education' | 'skills' | 'languages' | 'interests';
+
+
+interface ThemeColors {
+  primary: string;
+  secondary: string;
+  accent: string;
+  background: string;
+  text: string;
+  textSecondary: string;
+  sidebarBackground?: string;
+  sidebarText?: string;
+  leftSidebarBackground?: string;
+  leftSidebarText?: string;
+  rightSidebarBackground?: string;
+  rightSidebarText?: string;
+}
 
 export interface Theme {
   name:string;
   font: string;
   fonts: FontOption[];
-  colors: {
-    primary: string;
-    secondary: string;
-    accent: string;
-    background: string;
-    text: string;
-    textSecondary: string;
-    sidebarBackground?: string;
-    sidebarText?: string;
-    leftSidebarBackground?: string;
-    leftSidebarText?: string;
-    rightSidebarBackground?: string;
-    rightSidebarText?: string;
-  };
+  colors: ThemeColors;
+  darkColors?: ThemeColors;
   layout: {
     style: 'single-column' | 'two-column' | 'three-column';
     headerAlignment: string; // 'text-left', 'text-center', 'text-right'

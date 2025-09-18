@@ -7,6 +7,7 @@ interface ThemeSelectorProps {
   selectedTheme: Theme;
   setSelectedTheme: (name: string) => void;
   onThemeUpdate: (theme: Theme) => void;
+  isDarkMode: boolean;
 }
 
 const ColorPicker: React.FC<{
@@ -78,14 +79,16 @@ const SIZING_SECTIONS: { key: SectionKey | 'global'; name: string }[] = [
     { key: 'sidebarInterests', name: 'Sidebar: Interests' },
 ];
 
-export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ themes, selectedTheme, setSelectedTheme, onThemeUpdate }) => {
+export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ themes, selectedTheme, setSelectedTheme, onThemeUpdate, isDarkMode }) => {
   const [selectedSizingSection, setSelectedSizingSection] = useState<SectionKey | 'global'>('global');
   
   const handleColorChange = (colorType: 'primary' | 'secondary' | 'accent', newColor: string) => {
+    const colorSetKey = isDarkMode && selectedTheme.darkColors ? 'darkColors' : 'colors';
+    
     const updatedTheme = {
       ...selectedTheme,
-      colors: {
-        ...selectedTheme.colors,
+      [colorSetKey]: {
+        ...selectedTheme[colorSetKey],
         [colorType]: newColor,
       },
     };
@@ -126,6 +129,8 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ themes, selectedTh
     ? selectedTheme.sizing 
     : { ...selectedTheme.sizing, ...selectedTheme.sectionSizing?.[selectedSizingSection] };
 
+  const currentColors = (isDarkMode && selectedTheme.darkColors) ? selectedTheme.darkColors : selectedTheme.colors;
+
   return (
     <div>
       <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-3">Choose a Theme</h3>
@@ -139,13 +144,13 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ themes, selectedTh
             }}
             className={`p-2 rounded-lg border-2 transition-all duration-200 ${selectedTheme.name === theme.name ? 'border-blue-500 scale-105' : 'border-gray-200 dark:border-gray-600 hover:border-blue-400'}`}
           >
-            <div className="h-16 w-full flex flex-col justify-between p-2 rounded bg-white shadow-inner">
+            <div className="h-16 w-full flex flex-col justify-between p-2 rounded bg-white shadow-inner dark:bg-gray-700">
               <div className="flex items-center gap-1">
-                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: theme.colors.accent }}></div>
-                 <div className="flex-1 h-1 bg-gray-300 rounded-full"></div>
+                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: isDarkMode && theme.darkColors ? theme.darkColors.accent : theme.colors.accent }}></div>
+                 <div className="flex-1 h-1 bg-gray-300 dark:bg-gray-500 rounded-full"></div>
               </div>
-              <div className="flex-1 w-2/3 h-1 bg-gray-200 rounded-full mt-2"></div>
-               <div className="flex-1 w-full h-1 bg-gray-200 rounded-full mt-1"></div>
+              <div className="flex-1 w-2/3 h-1 bg-gray-200 dark:bg-gray-600 rounded-full mt-2"></div>
+               <div className="flex-1 w-full h-1 bg-gray-200 dark:bg-gray-600 rounded-full mt-1"></div>
             </div>
             <p className={`mt-2 text-sm font-medium text-center ${selectedTheme.name === theme.name ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-300'}`}>{theme.name}</p>
           </button>
@@ -177,17 +182,17 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ themes, selectedTh
                 </div>
                 <ColorPicker
                 label="Primary"
-                color={selectedTheme.colors.primary}
+                color={currentColors.primary}
                 onChange={(newColor) => handleColorChange('primary', newColor)}
                 />
                 <ColorPicker
                 label="Secondary"
-                color={selectedTheme.colors.secondary}
+                color={currentColors.secondary}
                 onChange={(newColor) => handleColorChange('secondary', newColor)}
                 />
                 <ColorPicker
                 label="Accent"
-                color={selectedTheme.colors.accent}
+                color={currentColors.accent}
                 onChange={(newColor) => handleColorChange('accent', newColor)}
                 />
             </div>

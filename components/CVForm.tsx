@@ -1,12 +1,15 @@
 
 import React, { useState } from 'react';
-import type { CVData, Experience, Education, Skill, Language, Interest } from '../types';
+import type { CVData, Experience, Education, Skill, Language, Interest, ReorderableSectionKey } from '../types';
 import { v4 as uuidv4 } from 'uuid';
+import { DragHandleIcon } from './Icons';
 
 interface CVFormProps {
   cvData: CVData;
   setCvData: React.Dispatch<React.SetStateAction<CVData>>;
   accentColor: string;
+  sectionOrder: ReorderableSectionKey[];
+  setSectionOrder: React.Dispatch<React.SetStateAction<ReorderableSectionKey[]>>;
 }
 
 const InputField: React.FC<{ label: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; placeholder?: string, type?: string }> = ({ label, value, onChange, placeholder, type = 'text' }) => (
@@ -91,9 +94,32 @@ const ImageUploadField: React.FC<{ label: string; photo: string; onPhotoChange: 
 };
 
 
-const SectionWrapper: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-    <div className="mt-8">
-        <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">{title}</h3>
+const SectionWrapper: React.FC<{ 
+    title: string; 
+    children: React.ReactNode; 
+    isDraggable?: boolean; 
+    onDragStart?: React.DragEventHandler<HTMLDivElement>;
+    onDragOver?: React.DragEventHandler<HTMLDivElement>;
+    onDrop?: React.DragEventHandler<HTMLDivElement>;
+    onDragEnd?: React.DragEventHandler<HTMLDivElement>;
+    isDragging?: boolean;
+}> = ({ title, children, isDraggable, onDragStart, onDragOver, onDrop, onDragEnd, isDragging }) => (
+    <div 
+        className={`mt-8 transition-opacity duration-300 ${isDragging ? 'opacity-50' : 'opacity-100'}`}
+        draggable={isDraggable}
+        onDragStart={onDragStart}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
+        onDragEnd={onDragEnd}
+    >
+        <div className="flex items-center mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">
+            {isDraggable && (
+                <div className="cursor-grab text-gray-400 dark:text-gray-500 mr-2 hover:text-gray-600 dark:hover:text-gray-300">
+                    <DragHandleIcon className="w-5 h-5" />
+                </div>
+            )}
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-white">{title}</h3>
+        </div>
         <div className="space-y-4">
             {children}
         </div>
@@ -102,8 +128,9 @@ const SectionWrapper: React.FC<{ title: string; children: React.ReactNode }> = (
 
 type DeletableSection = 'experience' | 'education' | 'skills' | 'languages' | 'interests';
 
-export const CVForm: React.FC<CVFormProps> = ({ cvData, setCvData, accentColor }) => {
+export const CVForm: React.FC<CVFormProps> = ({ cvData, setCvData, accentColor, sectionOrder, setSectionOrder }) => {
     const [itemToDelete, setItemToDelete] = useState<{ section: DeletableSection; id: string } | null>(null);
+    const [draggedItem, setDraggedItem] = useState<ReorderableSectionKey | null>(null);
 
     const handleChange = <T extends keyof CVData['personalInfo'],>(section: 'personalInfo', field: T, value: CVData['personalInfo'][T]) => {
         setCvData(prev => ({
@@ -157,88 +184,165 @@ export const CVForm: React.FC<CVFormProps> = ({ cvData, setCvData, accentColor }
         setItemToDelete(null);
     };
 
+    const handleDragStart = (e: React.DragEvent<HTMLDivElement>, section: ReorderableSectionKey) => {
+        setDraggedItem(section);
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', section);
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+    };
+    
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>, targetSection: ReorderableSectionKey) => {
+        e.preventDefault();
+        if (!draggedItem || draggedItem === targetSection) {
+            setDraggedItem(null);
+            return;
+        }
+
+        const currentIndex = sectionOrder.indexOf(draggedItem);
+        const targetIndex = sectionOrder.indexOf(targetSection);
+        
+        const newOrder = Array.from(sectionOrder);
+        const [removed] = newOrder.splice(currentIndex, 1);
+        newOrder.splice(targetIndex, 0, removed);
+        
+        setSectionOrder(newOrder);
+        setDraggedItem(null);
+    };
+
+    const handleDragEnd = () => {
+        setDraggedItem(null);
+    };
+
+    const sectionComponents: Record<ReorderableSectionKey, { title: string, content: React.ReactNode }> = {
+        summary: {
+            title: 'Summary',
+            content: <TextAreaField label="Professional Summary" value={cvData.personalInfo.summary} onChange={(e) => handleChange('personalInfo', 'summary', e.target.value)} placeholder="Write a brief professional summary..." />
+        },
+        experience: {
+            title: 'Work Experience',
+            content: (
+                <>
+                    {cvData.experience.map((exp, index) => (
+                      <div key={exp.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg space-y-3 relative">
+                        <InputField label="Company" value={exp.company} onChange={(e) => handleArrayChange('experience', index, 'company', e.target.value)} />
+                        <InputField label="Role" value={exp.role} onChange={(e) => handleArrayChange('experience', index, 'role', e.target.value)} />
+                        <div className="grid grid-cols-2 gap-4">
+                          <InputField label="Start Date" value={exp.startDate} onChange={(e) => handleArrayChange('experience', index, 'startDate', e.target.value)} />
+                          <InputField label="End Date" value={exp.endDate} onChange={(e) => handleArrayChange('experience', index, 'endDate', e.target.value)} />
+                        </div>
+                        <TextAreaField label="Description" value={exp.description} onChange={(e) => handleArrayChange('experience', index, 'description', e.target.value)} placeholder="- Main responsibilities and achievements..." />
+                        <button type="button" onClick={() => setItemToDelete({ section: 'experience', id: exp.id })} className="absolute top-2 right-2 text-red-500 hover:text-red-700">&times;</button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => addArrayItem('experience')} style={{backgroundColor: accentColor}} className="w-full py-2 text-white font-semibold rounded-md hover:opacity-90 transition">+ Add Experience</button>
+                </>
+            )
+        },
+        education: {
+            title: 'Education',
+            content: (
+                 <>
+                    {cvData.education.map((edu, index) => (
+                      <div key={edu.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg space-y-3 relative">
+                        <InputField label="Institution" value={edu.institution} onChange={(e) => handleArrayChange('education', index, 'institution', e.target.value)} />
+                        <InputField label="Degree" value={edu.degree} onChange={(e) => handleArrayChange('education', index, 'degree', e.target.value)} />
+                        <div className="grid grid-cols-2 gap-4">
+                          <InputField label="Start Date" value={edu.startDate} onChange={(e) => handleArrayChange('education', index, 'startDate', e.target.value)} />
+                          <InputField label="End Date" value={edu.endDate} onChange={(e) => handleArrayChange('education', index, 'endDate', e.target.value)} />
+                        </div>
+                        <TextAreaField label="Description" value={edu.description} onChange={(e) => handleArrayChange('education', index, 'description', e.target.value)} placeholder="- Relevant coursework, awards..." />
+                        <button type="button" onClick={() => setItemToDelete({ section: 'education', id: edu.id })} className="absolute top-2 right-2 text-red-500 hover:text-red-700">&times;</button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => addArrayItem('education')} style={{backgroundColor: accentColor}} className="w-full py-2 text-white font-semibold rounded-md hover:opacity-90 transition">+ Add Education</button>
+                </>
+            )
+        },
+        skills: {
+            title: 'Skills',
+            content: (
+                 <>
+                    {cvData.skills.map((skill, index) => (
+                      <div key={skill.id} className="flex items-center gap-2">
+                        <InputField label={`Skill ${index + 1}`} value={skill.name} onChange={(e) => handleArrayChange('skills', index, 'name', e.target.value)} />
+                        <button type="button" onClick={() => setItemToDelete({ section: 'skills', id: skill.id })} className="mt-6 text-red-500 hover:text-red-700">&times;</button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => addArrayItem('skills')} style={{backgroundColor: accentColor}} className="w-full py-2 text-white font-semibold rounded-md hover:opacity-90 transition">+ Add Skill</button>
+                </>
+            )
+        },
+        languages: {
+            title: 'Languages',
+            content: (
+                 <>
+                    {cvData.languages.map((lang, index) => (
+                      <div key={lang.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg space-y-3 relative">
+                        <div className="grid grid-cols-2 gap-4">
+                            <InputField label="Language" value={lang.name} onChange={(e) => handleArrayChange('languages', index, 'name', e.target.value)} />
+                            <InputField label="Level" value={lang.level} onChange={(e) => handleArrayChange('languages', index, 'level', e.target.value)} placeholder="e.g., Native, Fluent" />
+                        </div>
+                        <button type="button" onClick={() => setItemToDelete({ section: 'languages', id: lang.id })} className="absolute top-2 right-2 text-red-500 hover:text-red-700">&times;</button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => addArrayItem('languages')} style={{backgroundColor: accentColor}} className="w-full py-2 text-white font-semibold rounded-md hover:opacity-90 transition">+ Add Language</button>
+                </>
+            )
+        },
+        interests: {
+            title: 'Interests',
+            content: (
+                 <>
+                    {cvData.interests.map((interest, index) => (
+                      <div key={interest.id} className="flex items-center gap-2">
+                        <InputField label={`Interest ${index + 1}`} value={interest.name} onChange={(e) => handleArrayChange('interests', index, 'name', e.target.value)} />
+                        <button type="button" onClick={() => setItemToDelete({ section: 'interests', id: interest.id })} className="mt-6 text-red-500 hover:text-red-700">&times;</button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => addArrayItem('interests')} style={{backgroundColor: accentColor}} className="w-full py-2 text-white font-semibold rounded-md hover:opacity-90 transition">+ Add Interest</button>
+                </>
+            )
+        }
+    };
+
+
   return (
     <form className="space-y-6 mt-6">
-      <SectionWrapper title="Personal Information">
-        <ImageUploadField
-            label="Profile Photo"
-            photo={cvData.personalInfo.photo}
-            onPhotoChange={(base64) => handleChange('personalInfo', 'photo', base64)}
-            onPhotoRemove={() => handleChange('personalInfo', 'photo', '')}
-        />
-        <InputField label="Full Name" value={cvData.personalInfo.name} onChange={(e) => handleChange('personalInfo', 'name', e.target.value)} />
-        <InputField label="Job Title" value={cvData.personalInfo.title} onChange={(e) => handleChange('personalInfo', 'title', e.target.value)} />
-        <InputField label="Phone" type="tel" value={cvData.personalInfo.phone} onChange={(e) => handleChange('personalInfo', 'phone', e.target.value)} />
-        <InputField label="Email" type="email" value={cvData.personalInfo.email} onChange={(e) => handleChange('personalInfo', 'email', e.target.value)} />
-        <InputField label="Location" value={cvData.personalInfo.location} onChange={(e) => handleChange('personalInfo', 'location', e.target.value)} />
-        <InputField label="Website/Portfolio" value={cvData.personalInfo.website} onChange={(e) => handleChange('personalInfo', 'website', e.target.value)} />
-        <TextAreaField label="Summary" value={cvData.personalInfo.summary} onChange={(e) => handleChange('personalInfo', 'summary', e.target.value)} placeholder="Write a brief professional summary..." />
-      </SectionWrapper>
-
-      <SectionWrapper title="Work Experience">
-        {cvData.experience.map((exp, index) => (
-          <div key={exp.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg space-y-3 relative">
-            <InputField label="Company" value={exp.company} onChange={(e) => handleArrayChange('experience', index, 'company', e.target.value)} />
-            <InputField label="Role" value={exp.role} onChange={(e) => handleArrayChange('experience', index, 'role', e.target.value)} />
-            <div className="grid grid-cols-2 gap-4">
-              <InputField label="Start Date" value={exp.startDate} onChange={(e) => handleArrayChange('experience', index, 'startDate', e.target.value)} />
-              <InputField label="End Date" value={exp.endDate} onChange={(e) => handleArrayChange('experience', index, 'endDate', e.target.value)} />
-            </div>
-            <TextAreaField label="Description" value={exp.description} onChange={(e) => handleArrayChange('experience', index, 'description', e.target.value)} placeholder="- Main responsibilities and achievements..." />
-            <button type="button" onClick={() => setItemToDelete({ section: 'experience', id: exp.id })} className="absolute top-2 right-2 text-red-500 hover:text-red-700">&times;</button>
-          </div>
-        ))}
-        <button type="button" onClick={() => addArrayItem('experience')} style={{backgroundColor: accentColor}} className="w-full py-2 text-white font-semibold rounded-md hover:opacity-90 transition">+ Add Experience</button>
-      </SectionWrapper>
+      <div className="mt-8">
+        <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">Personal Information</h3>
+        <div className="space-y-4">
+            <ImageUploadField
+                label="Profile Photo"
+                photo={cvData.personalInfo.photo}
+                onPhotoChange={(base64) => handleChange('personalInfo', 'photo', base64)}
+                onPhotoRemove={() => handleChange('personalInfo', 'photo', '')}
+            />
+            <InputField label="Full Name" value={cvData.personalInfo.name} onChange={(e) => handleChange('personalInfo', 'name', e.target.value)} />
+            <InputField label="Job Title" value={cvData.personalInfo.title} onChange={(e) => handleChange('personalInfo', 'title', e.target.value)} />
+            <InputField label="Phone" type="tel" value={cvData.personalInfo.phone} onChange={(e) => handleChange('personalInfo', 'phone', e.target.value)} />
+            <InputField label="Email" type="email" value={cvData.personalInfo.email} onChange={(e) => handleChange('personalInfo', 'email', e.target.value)} />
+            <InputField label="Location" value={cvData.personalInfo.location} onChange={(e) => handleChange('personalInfo', 'location', e.target.value)} />
+            <InputField label="Website/Portfolio" value={cvData.personalInfo.website} onChange={(e) => handleChange('personalInfo', 'website', e.target.value)} />
+        </div>
+      </div>
       
-      <SectionWrapper title="Education">
-        {cvData.education.map((edu, index) => (
-          <div key={edu.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg space-y-3 relative">
-            <InputField label="Institution" value={edu.institution} onChange={(e) => handleArrayChange('education', index, 'institution', e.target.value)} />
-            <InputField label="Degree" value={edu.degree} onChange={(e) => handleArrayChange('education', index, 'degree', e.target.value)} />
-            <div className="grid grid-cols-2 gap-4">
-              <InputField label="Start Date" value={edu.startDate} onChange={(e) => handleArrayChange('education', index, 'startDate', e.target.value)} />
-              <InputField label="End Date" value={edu.endDate} onChange={(e) => handleArrayChange('education', index, 'endDate', e.target.value)} />
-            </div>
-            <TextAreaField label="Description" value={edu.description} onChange={(e) => handleArrayChange('education', index, 'description', e.target.value)} placeholder="- Relevant coursework, awards..." />
-            <button type="button" onClick={() => setItemToDelete({ section: 'education', id: edu.id })} className="absolute top-2 right-2 text-red-500 hover:text-red-700">&times;</button>
-          </div>
-        ))}
-        <button type="button" onClick={() => addArrayItem('education')} style={{backgroundColor: accentColor}} className="w-full py-2 text-white font-semibold rounded-md hover:opacity-90 transition">+ Add Education</button>
-      </SectionWrapper>
-
-      <SectionWrapper title="Skills">
-        {cvData.skills.map((skill, index) => (
-          <div key={skill.id} className="flex items-center gap-2">
-            <InputField label={`Skill ${index + 1}`} value={skill.name} onChange={(e) => handleArrayChange('skills', index, 'name', e.target.value)} />
-            <button type="button" onClick={() => setItemToDelete({ section: 'skills', id: skill.id })} className="mt-6 text-red-500 hover:text-red-700">&times;</button>
-          </div>
-        ))}
-        <button type="button" onClick={() => addArrayItem('skills')} style={{backgroundColor: accentColor}} className="w-full py-2 text-white font-semibold rounded-md hover:opacity-90 transition">+ Add Skill</button>
-      </SectionWrapper>
-      
-      <SectionWrapper title="Languages">
-        {cvData.languages.map((lang, index) => (
-          <div key={lang.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg space-y-3 relative">
-            <div className="grid grid-cols-2 gap-4">
-                <InputField label="Language" value={lang.name} onChange={(e) => handleArrayChange('languages', index, 'name', e.target.value)} />
-                <InputField label="Level" value={lang.level} onChange={(e) => handleArrayChange('languages', index, 'level', e.target.value)} placeholder="e.g., Native, Fluent" />
-            </div>
-            <button type="button" onClick={() => setItemToDelete({ section: 'languages', id: lang.id })} className="absolute top-2 right-2 text-red-500 hover:text-red-700">&times;</button>
-          </div>
-        ))}
-        <button type="button" onClick={() => addArrayItem('languages')} style={{backgroundColor: accentColor}} className="w-full py-2 text-white font-semibold rounded-md hover:opacity-90 transition">+ Add Language</button>
-      </SectionWrapper>
-      
-      <SectionWrapper title="Interests">
-        {cvData.interests.map((interest, index) => (
-          <div key={interest.id} className="flex items-center gap-2">
-            <InputField label={`Interest ${index + 1}`} value={interest.name} onChange={(e) => handleArrayChange('interests', index, 'name', e.target.value)} />
-            <button type="button" onClick={() => setItemToDelete({ section: 'interests', id: interest.id })} className="mt-6 text-red-500 hover:text-red-700">&times;</button>
-          </div>
-        ))}
-        <button type="button" onClick={() => addArrayItem('interests')} style={{backgroundColor: accentColor}} className="w-full py-2 text-white font-semibold rounded-md hover:opacity-90 transition">+ Add Interest</button>
-      </SectionWrapper>
+      {sectionOrder.map(sectionKey => (
+        <SectionWrapper
+            key={sectionKey}
+            title={sectionComponents[sectionKey].title}
+            isDraggable
+            onDragStart={(e) => handleDragStart(e, sectionKey)}
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, sectionKey)}
+            onDragEnd={handleDragEnd}
+            isDragging={draggedItem === sectionKey}
+        >
+            {sectionComponents[sectionKey].content}
+        </SectionWrapper>
+      ))}
 
       {itemToDelete && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" aria-modal="true" role="dialog">

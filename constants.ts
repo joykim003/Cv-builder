@@ -87,6 +87,14 @@ export const THEMES: Theme[] = [
       text: '#374151',
       textSecondary: '#6B7280'
     },
+    darkColors: {
+      primary: '#F9FAFB',
+      secondary: '#60A5FA',
+      accent: '#60A5FA',
+      background: '#1F2937',
+      text: '#D1D5DB',
+      textSecondary: '#9CA3AF'
+    },
     layout: {
       style: 'single-column',
       headerAlignment: 'text-left',
@@ -110,6 +118,14 @@ export const THEMES: Theme[] = [
       background: '#FFFFFF',
       text: '#374151',
       textSecondary: '#6B7280'
+    },
+    darkColors: {
+        primary: '#E5E7EB',
+        secondary: '#9CA3AF',
+        accent: '#E5E7EB',
+        background: '#111827',
+        text: '#D1D5DB',
+        textSecondary: '#9CA3AF'
     },
     layout: {
       style: 'single-column',
@@ -135,6 +151,14 @@ export const THEMES: Theme[] = [
       text: '#1F2937',
       textSecondary: '#6B7280'
     },
+    darkColors: {
+        primary: '#F9FAFB',
+        secondary: '#2DD4BF',
+        accent: '#2DD4BF',
+        background: '#111827',
+        text: '#E5E7EB',
+        textSecondary: '#9CA3AF'
+    },
     layout: {
       style: 'single-column',
       headerAlignment: 'text-left',
@@ -152,14 +176,24 @@ export const THEMES: Theme[] = [
     font: FONT_OPTIONS.INTER.value,
     fonts: SANS_SERIF_FONTS,
     colors: {
-      primary: '#0D1B2A',      // Dark Blue (Name, Section Titles)
-      secondary: '#6B7280',    // Gray (Job Title)
-      accent: '#0D1B2A',       // Use dark blue for form buttons
-      background: '#FFFFFF',    // White (Main content bg)
-      text: '#1F2937',         // Main text color
-      textSecondary: '#4B5563', // Lighter text
-      sidebarBackground: '#E6F0FA', // Light Blue (Sidebar bg)
-      sidebarText: '#0D1B2A',      // Text on sidebar
+      primary: '#0D1B2A',
+      secondary: '#6B7280',
+      accent: '#0D1B2A',
+      background: '#FFFFFF',
+      text: '#1F2937',
+      textSecondary: '#4B5563',
+      sidebarBackground: '#E6F0FA',
+      sidebarText: '#0D1B2A',
+    },
+    darkColors: {
+      primary: '#E0E1DD',
+      secondary: '#A1A1A1',
+      accent: '#E0E1DD',
+      background: '#1B263B',
+      text: '#E0E1DD',
+      textSecondary: '#A1A1A1',
+      sidebarBackground: '#0D1B2A',
+      sidebarText: '#E0E1DD',
     },
     layout: {
       style: 'two-column',
@@ -178,13 +212,23 @@ export const THEMES: Theme[] = [
     font: FONT_OPTIONS.INTER.value,
     fonts: SANS_SERIF_FONTS,
     colors: {
-      primary: '#374151', // Main content name color
-      secondary: '#6B7280', // Main content title color
-      accent: '#3B82F6', // Timeline dots, skill tags
+      primary: '#374151',
+      secondary: '#6B7280',
+      accent: '#3B82F6',
       background: '#FFFFFF',
       text: '#1F2937',
       textSecondary: '#4B5563',
-      sidebarBackground: '#1E293B', // Dark blue sidebar
+      sidebarBackground: '#1E293B',
+      sidebarText: '#E2E8F0',
+    },
+    darkColors: {
+      primary: '#F9FAFB',
+      secondary: '#9CA3AF',
+      accent: '#60A5FA',
+      background: '#111827',
+      text: '#D1D5DB',
+      textSecondary: '#9CA3AF',
+      sidebarBackground: '#0F172A',
       sidebarText: '#E2E8F0',
     },
     layout: {
@@ -206,12 +250,22 @@ export const THEMES: Theme[] = [
     colors: {
       primary: '#4E342E',
       secondary: '#795548',
-      accent: '#A1887F', // BG for section titles
+      accent: '#A1887F',
       background: '#F5F5F5',
       text: '#4E342E',
       textSecondary: '#6D4C41',
-      sidebarBackground: '#EFEBE9', // Light beige sidebar
+      sidebarBackground: '#EFEBE9',
       sidebarText: '#5D4037',
+    },
+    darkColors: {
+      primary: '#D7CCC8',
+      secondary: '#BCAAA4',
+      accent: '#8D6E63',
+      background: '#3E2723',
+      text: '#D7CCC8',
+      textSecondary: '#BCAAA4',
+      sidebarBackground: '#261C1A',
+      sidebarText: '#D7CCC8',
     },
     layout: {
       style: 'two-column',
@@ -230,14 +284,24 @@ export const THEMES: Theme[] = [
     font: FONT_OPTIONS.MONTSERRAT.value,
     fonts: SANS_SERIF_FONTS,
     colors: {
-      primary: '#1E293B', // Dark Slate
-      secondary: '#475569', // Medium Slate
-      accent: '#8B5CF6', // Violet
+      primary: '#1E293B',
+      secondary: '#475569',
+      accent: '#8B5CF6',
       background: '#FFFFFF',
       text: '#334155',
       textSecondary: '#64748B',
-      sidebarBackground: '#F3F4F6', // Light Gray
+      sidebarBackground: '#F3F4F6',
       sidebarText: '#1E293B',
+    },
+    darkColors: {
+      primary: '#F1F5F9',
+      secondary: '#94A3B8',
+      accent: '#A78BFA',
+      background: '#1E293B',
+      text: '#CBD5E1',
+      textSecondary: '#94A3B8',
+      sidebarBackground: '#0F172A',
+      sidebarText: '#F1F5F9',
     },
     layout: {
       style: 'two-column',
@@ -257,14 +321,24 @@ export const THEMES: Theme[] = [
     font: FONT_OPTIONS.LATO.value,
     fonts: SANS_SERIF_FONTS,
     colors: {
-      primary: '#047857', // Emerald
-      secondary: '#475569', // Slate
-      accent: '#059669', // Brighter Emerald
-      background: '#FFFFFF', // White for main content
-      text: '#1E293B', // Dark Slate
+      primary: '#047857',
+      secondary: '#475569',
+      accent: '#059669',
+      background: '#FFFFFF',
+      text: '#1E293B',
       textSecondary: '#64748B',
-      sidebarBackground: '#F0FDF4', // Very light green
+      sidebarBackground: '#F0FDF4',
       sidebarText: '#1E293B',
+    },
+    darkColors: {
+      primary: '#6EE7B7',
+      secondary: '#94A3B8',
+      accent: '#34D399',
+      background: '#1F2937', // Dark Slate
+      text: '#F3F4F6',
+      textSecondary: '#9CA3AF',
+      sidebarBackground: '#064E3B', // Dark Green
+      sidebarText: '#ECFDF5',
     },
     layout: {
       style: 'two-column',
@@ -295,6 +369,18 @@ export const THEMES: Theme[] = [
       rightSidebarBackground: '#EDF2F7',
       rightSidebarText: '#2D3748',
     },
+    darkColors: {
+      primary: '#F7FAFC',
+      secondary: '#A0AEC0',
+      accent: '#F6E05E',
+      background: '#1A202C',
+      text: '#E2E8F0',
+      textSecondary: '#A0AEC0',
+      leftSidebarBackground: '#11151C',
+      leftSidebarText: '#E2E8F0',
+      rightSidebarBackground: '#2D3748',
+      rightSidebarText: '#E2E8F0',
+    },
     layout: {
       style: 'three-column',
       headerAlignment: 'text-left',
@@ -321,6 +407,18 @@ export const THEMES: Theme[] = [
       leftSidebarBackground: '#1F293B',
       leftSidebarText: '#E2E8F0',
       rightSidebarBackground: '#1F293B',
+      rightSidebarText: '#E2E8F0',
+    },
+    darkColors: {
+      primary: '#F9FAFB',
+      secondary: '#9CA3AF',
+      accent: '#FBBF24',
+      background: '#111827',
+      text: '#D1D5DB',
+      textSecondary: '#9CA3AF',
+      leftSidebarBackground: '#000000',
+      leftSidebarText: '#E2E8F0',
+      rightSidebarBackground: '#000000',
       rightSidebarText: '#E2E8F0',
     },
     layout: {
