@@ -60,6 +60,24 @@ export const INITIAL_CV_DATA: CVData = {
   ]
 };
 
+export const EMPTY_CV_DATA: CVData = {
+  personalInfo: {
+    name: '',
+    title: '',
+    phone: '',
+    email: '',
+    location: '',
+    website: '',
+    summary: '',
+    photo: '',
+  },
+  experience: [],
+  education: [],
+  skills: [],
+  languages: [],
+  interests: [],
+};
+
 const FONT_OPTIONS: Record<string, FontOption> = {
   INTER: { name: 'Inter', value: 'font-sans' },
   LORA: { name: 'Lora', value: '[font-family:Lora,serif]' },

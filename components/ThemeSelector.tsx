@@ -82,7 +82,7 @@ const SIZING_SECTIONS: { key: SectionKey | 'global'; name: string }[] = [
 export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ themes, selectedTheme, setSelectedTheme, onThemeUpdate, isDarkMode }) => {
   const [selectedSizingSection, setSelectedSizingSection] = useState<SectionKey | 'global'>('global');
   
-  const handleColorChange = (colorType: 'primary' | 'secondary' | 'accent', newColor: string) => {
+  const handleColorChange = (colorType: keyof Theme['colors'], newColor: string) => {
     const colorSetKey = isDarkMode && selectedTheme.darkColors ? 'darkColors' : 'colors';
     
     const updatedTheme = {
@@ -180,21 +180,51 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ themes, selectedTh
                         ))}
                     </select>
                 </div>
+
+                <h6 className="text-sm font-medium text-gray-500 dark:text-gray-400 !mt-4 border-t border-gray-200 dark:border-gray-600 pt-3">Theme Colors</h6>
                 <ColorPicker
-                label="Primary"
-                color={currentColors.primary}
-                onChange={(newColor) => handleColorChange('primary', newColor)}
+                    label="Primary"
+                    color={currentColors.primary}
+                    onChange={(newColor) => handleColorChange('primary', newColor)}
                 />
                 <ColorPicker
-                label="Secondary"
-                color={currentColors.secondary}
-                onChange={(newColor) => handleColorChange('secondary', newColor)}
+                    label="Secondary"
+                    color={currentColors.secondary}
+                    onChange={(newColor) => handleColorChange('secondary', newColor)}
                 />
                 <ColorPicker
-                label="Accent"
-                color={currentColors.accent}
-                onChange={(newColor) => handleColorChange('accent', newColor)}
+                    label="Accent"
+                    color={currentColors.accent}
+                    onChange={(newColor) => handleColorChange('accent', newColor)}
                 />
+                
+                <h6 className="text-sm font-medium text-gray-500 dark:text-gray-400 !mt-4 border-t border-gray-200 dark:border-gray-600 pt-3">Background Colors</h6>
+                <ColorPicker
+                    label={selectedTheme.layout.style === 'single-column' ? 'Page Background' : 'Main Background'}
+                    color={currentColors.background}
+                    onChange={(newColor) => handleColorChange('background', newColor)}
+                />
+                {selectedTheme.layout.style === 'two-column' && typeof currentColors.sidebarBackground !== 'undefined' && (
+                    <ColorPicker
+                        label="Sidebar Background"
+                        color={currentColors.sidebarBackground}
+                        onChange={(newColor) => handleColorChange('sidebarBackground', newColor)}
+                    />
+                )}
+                {selectedTheme.layout.style === 'three-column' && typeof currentColors.leftSidebarBackground !== 'undefined' && (
+                    <ColorPicker
+                        label="Left Sidebar"
+                        color={currentColors.leftSidebarBackground}
+                        onChange={(newColor) => handleColorChange('leftSidebarBackground', newColor)}
+                    />
+                )}
+                {selectedTheme.layout.style === 'three-column' && typeof currentColors.rightSidebarBackground !== 'undefined' && (
+                    <ColorPicker
+                        label="Right Sidebar"
+                        color={currentColors.rightSidebarBackground}
+                        onChange={(newColor) => handleColorChange('rightSidebarBackground', newColor)}
+                    />
+                )}
             </div>
 
             <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg space-y-4">

@@ -1,20 +1,77 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { CVForm } from './components/CVForm';
 import { CVPreview } from './components/CVPreview';
 import { ThemeSelector } from './components/ThemeSelector';
+import { WelcomeModal } from './components/WelcomeModal';
 import type { CVData, ReorderableSectionKey, Theme } from './types';
-import { INITIAL_CV_DATA, THEMES } from './constants';
-import { DownloadIcon, SunIcon, MoonIcon } from './components/Icons';
+import { INITIAL_CV_DATA, EMPTY_CV_DATA, THEMES } from './constants';
+import { DownloadIcon, SunIcon, MoonIcon, EyeIcon, PencilIcon } from './components/Icons';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
+// Function to safely load and parse data from localStorage
+const loadCvDataFromStorage = (): CVData | null => {
+    try {
+        const savedData = localStorage.getItem('cvData');
+        if (savedData) {
+            const parsedData = JSON.parse(savedData);
+            // Basic validation to ensure it has the expected structure
+            if (parsedData && typeof parsedData === 'object' && parsedData.personalInfo) {
+                return parsedData;
+            }
+        }
+    } catch (e) {
+        console.error("Failed to parse CV data from localStorage", e);
+    }
+    return null;
+};
+
+
 const App: React.FC = () => {
-  const [cvData, setCvData] = useState<CVData>(INITIAL_CV_DATA);
+  const [cvData, setCvData] = useState<CVData | null>(loadCvDataFromStorage);
   const [themes, setThemes] = useState<Theme[]>(THEMES);
   const [selectedThemeName, setSelectedThemeName] = useState<string>(THEMES[0].name);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
+  
+  const controlsRef = useRef<HTMLDivElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
+  const [isPreviewVisibleOnMobile, setIsPreviewVisibleOnMobile] = useState(false);
+  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+
+  // Effect to handle first visit and initialize data if it's not loaded from storage
+  useEffect(() => {
+    if (cvData) {
+        return; // Data already loaded, do nothing
+    }
+
+    try {
+        const hasVisited = localStorage.getItem('hasVisitedBefore');
+        if (!hasVisited) {
+            setShowWelcomeModal(true);
+        } else {
+            // Not first visit, but no data in storage (e.g., cleared cache). Default to example.
+            setCvData(INITIAL_CV_DATA);
+        }
+    } catch (e) {
+        console.error("Could not access localStorage", e);
+        // Fallback for environments where localStorage is blocked
+        setCvData(INITIAL_CV_DATA);
+    }
+  }, []); // Run only on mount
+
+  // Effect to save cvData to localStorage whenever it changes
+  useEffect(() => {
+    if (cvData) {
+        try {
+            localStorage.setItem('cvData', JSON.stringify(cvData));
+        } catch (e) {
+            console.error("Could not save CV data to localStorage", e);
+        }
+    }
+  }, [cvData]);
+
 
   const [sectionOrder, setSectionOrder] = useState<ReorderableSectionKey[]>(() => {
     const savedOrder = localStorage.getItem('sectionOrder');
@@ -45,6 +102,32 @@ const App: React.FC = () => {
     }
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (window.innerWidth < 1024) {
+          setIsPreviewVisibleOnMobile(entry.isIntersecting);
+        }
+      },
+      {
+        root: null, // relative to the viewport
+        rootMargin: '0px',
+        threshold: 0.1, // 10% of the item must be visible
+      }
+    );
+
+    const currentPreviewRef = previewRef.current;
+    if (currentPreviewRef) {
+      observer.observe(currentPreviewRef);
+    }
+
+    return () => {
+      if (currentPreviewRef) {
+        observer.unobserve(currentPreviewRef);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -78,6 +161,7 @@ const App: React.FC = () => {
   };
 
   const handleDownload = async () => {
+    if (!cvData) return;
     const cvPreviewElement = document.getElementById('cv-preview');
     if (!cvPreviewElement) {
       console.error('CV preview element not found for PDF generation.');
@@ -143,6 +227,46 @@ const App: React.FC = () => {
         }, 1500);
     }
   };
+  
+  const handleToggleView = () => {
+    if (isPreviewVisibleOnMobile) {
+        controlsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+        previewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleStartFromScratch = () => {
+    setCvData(EMPTY_CV_DATA);
+    handleCloseWelcomeModal();
+  };
+
+  const handleStartWithExample = () => {
+    setCvData(INITIAL_CV_DATA);
+    handleCloseWelcomeModal();
+  };
+
+  const handleCloseWelcomeModal = () => {
+    try {
+        localStorage.setItem('hasVisitedBefore', 'true');
+    } catch(e) {
+        console.error("Could not set localStorage item", e);
+    }
+    setShowWelcomeModal(false);
+  };
+
+  if (!cvData) {
+    return (
+        <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+            {showWelcomeModal && (
+                <WelcomeModal 
+                    onStartFromScratch={handleStartFromScratch}
+                    onStartWithExample={handleStartWithExample}
+                />
+            )}
+        </div>
+    );
+  }
 
   if (!selectedTheme || !activeTheme) {
     return <div>Error: Theme not found.</div>;
@@ -150,9 +274,15 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+      {showWelcomeModal && (
+        <WelcomeModal 
+            onStartFromScratch={handleStartFromScratch}
+            onStartWithExample={handleStartWithExample}
+        />
+      )}
       <main className="grid grid-cols-1 lg:grid-cols-2 min-h-screen gap-8 p-4 md:p-8">
         {/* Controls Section */}
-        <div id="controls" className="lg:overflow-y-auto lg:h-screen lg:pb-20">
+        <div id="controls" ref={controlsRef} className="lg:overflow-y-auto lg:h-screen lg:pb-20">
             <div className="p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg">
                 <header className="mb-6 flex justify-between items-center">
                     <div>
@@ -176,7 +306,7 @@ const App: React.FC = () => {
                 />
                 <CVForm 
                     cvData={cvData} 
-                    setCvData={setCvData} 
+                    setCvData={setCvData as React.Dispatch<React.SetStateAction<CVData>>} 
                     accentColor={activeTheme.colors.accent}
                     sectionOrder={sectionOrder}
                     setSectionOrder={setSectionOrder}
@@ -185,7 +315,7 @@ const App: React.FC = () => {
         </div>
 
         {/* Preview Section */}
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center" ref={previewRef}>
             <div id="preview-header" className="w-full max-w-[210mm] flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Live Preview</h2>
                 <button 
@@ -216,6 +346,23 @@ const App: React.FC = () => {
             </div>
         </div>
       </main>
+      <button
+            onClick={handleToggleView}
+            aria-label={isPreviewVisibleOnMobile ? 'Edit Details' : 'Show Preview'}
+            className="lg:hidden fixed bottom-5 right-5 z-50 flex items-center gap-2 px-4 py-3 bg-blue-600 text-white font-semibold rounded-full shadow-lg hover:bg-blue-700 transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75"
+        >
+            {isPreviewVisibleOnMobile ? (
+                <>
+                    <PencilIcon className="w-5 h-5" />
+                    <span>Edit</span>
+                </>
+            ) : (
+                <>
+                    <EyeIcon className="w-5 h-5" />
+                    <span>Preview</span>
+                </>
+            )}
+      </button>
     </div>
   );
 };
