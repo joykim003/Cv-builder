@@ -1,4 +1,3 @@
-
 import type { CVData, Theme, FontOption } from './types';
 
 export const INITIAL_CV_DATA: CVData = {
@@ -252,5 +251,88 @@ export const THEMES: Theme[] = [
       spacing: 1.0,
     },
     sectionSizing: {}
+  },
+  {
+    name: 'Diagonal Split',
+    font: FONT_OPTIONS.LATO.value,
+    fonts: SANS_SERIF_FONTS,
+    colors: {
+      primary: '#047857', // Emerald
+      secondary: '#475569', // Slate
+      accent: '#059669', // Brighter Emerald
+      background: '#FFFFFF', // White for main content
+      text: '#1E293B', // Dark Slate
+      textSecondary: '#64748B',
+      sidebarBackground: '#F0FDF4', // Very light green
+      sidebarText: '#1E293B',
+    },
+    layout: {
+      style: 'two-column',
+      headerAlignment: 'text-left',
+      sectionTitleStyle: 'text-lg font-bold tracking-wide mb-4',
+      borderRadius: 'rounded-3xl',
+    },
+    sizing: {
+      baseFontSize: 10,
+      headingScale: 1.1,
+      spacing: 1.0,
+    },
+    sectionSizing: {}
+  },
+  {
+    name: 'Tri-Column Impact',
+    font: FONT_OPTIONS.MONTSERRAT.value,
+    fonts: SANS_SERIF_FONTS,
+    colors: {
+      primary: '#2d3748',
+      secondary: '#4a5568',
+      accent: '#D69E2E',
+      background: '#FFFFFF',
+      text: '#2D3748',
+      textSecondary: '#718096',
+      leftSidebarBackground: '#1A202C',
+      leftSidebarText: '#E2E8F0',
+      rightSidebarBackground: '#EDF2F7',
+      rightSidebarText: '#2D3748',
+    },
+    layout: {
+      style: 'three-column',
+      headerAlignment: 'text-left',
+      sectionTitleStyle: 'text-sm font-bold uppercase tracking-wider mb-3 pb-1 border-b',
+    },
+    sizing: {
+      baseFontSize: 10,
+      headingScale: 1.1,
+      spacing: 1.0,
+    },
+    sectionSizing: {},
+  },
+  {
+    name: 'Rounded Oblique',
+    font: FONT_OPTIONS.MONTSERRAT.value,
+    fonts: SANS_SERIF_FONTS,
+    colors: {
+      primary: '#111827',
+      secondary: '#4B5563',
+      accent: '#F59E0B',
+      background: '#FFFFFF',
+      text: '#374151',
+      textSecondary: '#6B7280',
+      leftSidebarBackground: '#1F293B',
+      leftSidebarText: '#E2E8F0',
+      rightSidebarBackground: '#1F293B',
+      rightSidebarText: '#E2E8F0',
+    },
+    layout: {
+      style: 'three-column',
+      headerAlignment: 'text-center',
+      sectionTitleStyle: 'text-sm font-bold uppercase tracking-wider',
+    },
+    sizing: {
+      baseFontSize: 10,
+      headingScale: 1.1,
+      spacing: 1.2,
+    },
+    sectionSizing: {},
   }
 ];

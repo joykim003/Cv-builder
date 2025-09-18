@@ -5,7 +5,7 @@ A beautiful, real-time CV template generator. Choose from multiple professional 
 ## ✨ Key Features
 
 -   **Live Preview:** See your CV update in real-time as you type.
--   **Multiple Themes:** Choose from a selection of professionally designed templates (`Modern Professional`, `Classic Elegance`, `Creative Tech`, `Professional Deep Blue`, `Corporate Blue`, `Earthy Tones`, `Rounded Charm`).
+-   **Multiple Themes:** Choose from a selection of professionally designed templates (`Modern Professional`, `Classic Elegance`, `Creative Tech`, `Professional Deep Blue`, `Corporate Blue`, `Earthy Tones`, `Rounded Charm`, `Tri-Column Impact`, `Rounded Oblique`, `Diagonal Split`).
 -   **Color & Font Customization:** Personalize your chosen theme with custom colors and a selection of professional fonts.
 -   **Layout Resizing:** Adjust the base font size, heading scale, and overall spacing to perfectly tailor the layout to your content.
 -   **Comprehensive Editing:** Easily add, edit, and delete sections for:

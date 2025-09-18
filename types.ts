@@ -76,9 +76,13 @@ export interface Theme {
     textSecondary: string;
     sidebarBackground?: string;
     sidebarText?: string;
+    leftSidebarBackground?: string;
+    leftSidebarText?: string;
+    rightSidebarBackground?: string;
+    rightSidebarText?: string;
   };
   layout: {
-    style: 'single-column' | 'two-column';
+    style: 'single-column' | 'two-column' | 'three-column';
     headerAlignment: string; // 'text-left', 'text-center', 'text-right'
     sectionTitleStyle: string; // Tailwind classes for section titles
     borderRadius?: string;

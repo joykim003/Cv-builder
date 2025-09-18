@@ -54,6 +54,242 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, theme }) => {
   const globalStyles = getSectionStyles('global');
 
 
+  if (theme.layout.style === 'three-column') {
+    const headerStyles = getSectionStyles('header');
+    const summaryStyles = getSectionStyles('summary');
+    const experienceStyles = getSectionStyles('experience');
+    const educationStyles = getSectionStyles('education');
+    const contactStyles = getSectionStyles('sidebarContact');
+    const languagesStyles = getSectionStyles('sidebarLanguages');
+    const skillsStyles = getSectionStyles('sidebarSkills');
+    const interestsStyles = getSectionStyles('sidebarInterests');
+
+    if (theme.name === 'Rounded Oblique') {
+        return (
+            <div 
+                className={`w-full h-full ${theme.font} overflow-hidden flex items-center justify-center`} 
+                style={{ backgroundColor: '#0F172A', fontSize: `${globalStyles.baseRem}px` }}
+            >
+                <div className="w-full h-[96%] flex gap-4 px-4">
+                    {/* Left Column */}
+                    <aside 
+                        className="w-[28%] h-full flex flex-col rounded-2xl" 
+                        style={{ backgroundColor: theme.colors.leftSidebarBackground, color: theme.colors.leftSidebarText, padding: globalStyles.s(8), gap: globalStyles.s(8) }}
+                    >
+                        {hasPhoto && (
+                            <div className="flex justify-center">
+                                <img 
+                                    src={personalInfo.photo} 
+                                    alt={personalInfo.name} 
+                                    className="w-28 h-28 rounded-full object-cover border-4"
+                                    style={{borderColor: theme.colors.accent}}
+                                />
+                            </div>
+                        )}
+                        <section>
+                            <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.accent, fontSize: contactStyles.font.base }}>Contact</h3>
+                            <div style={{ height: '2px', backgroundColor: theme.colors.accent, width: '40px', transform: 'skewY(-3deg)', marginTop: contactStyles.s(1) }}></div>
+                            <div className="flex flex-col" style={{ gap: contactStyles.s(3), marginTop: contactStyles.s(4)}}>
+                               <ContactInfoItem icon={<PhoneIcon className="w-4 h-4" />} text={personalInfo.phone} color={theme.colors.leftSidebarText!} style={{fontSize: contactStyles.font.sm, gap: contactStyles.s(3)}}/>
+                               <ContactInfoItem icon={<EmailIcon className="w-4 h-4" />} text={personalInfo.email} color={theme.colors.leftSidebarText!} style={{fontSize: contactStyles.font.sm, gap: contactStyles.s(3)}}/>
+                               <ContactInfoItem icon={<LocationIcon className="w-4 h-4" />} text={personalInfo.location} color={theme.colors.leftSidebarText!} style={{fontSize: contactStyles.font.sm, gap: contactStyles.s(3)}}/>
+                               <ContactInfoItem icon={<WebsiteIcon className="w-4 h-4" />} text={personalInfo.website} color={theme.colors.leftSidebarText!} style={{fontSize: contactStyles.font.sm, gap: contactStyles.s(3)}}/>
+                            </div>
+                        </section>
+                         <section>
+                           <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.accent, fontSize: languagesStyles.font.base }}>Languages</h3>
+                           <div style={{ height: '2px', backgroundColor: theme.colors.accent, width: '40px', transform: 'skewY(-3deg)', marginTop: languagesStyles.s(1) }}></div>
+                           <div className="flex flex-col" style={{gap: languagesStyles.s(2), marginTop: languagesStyles.s(4)}}>
+                             {languages.map(lang => (
+                               lang.name && <div key={lang.id} style={{fontSize: languagesStyles.font.sm}}>
+                                 <span>{lang.name}</span>
+                                 {lang.level && <span className="opacity-75"> – {lang.level}</span>}
+                               </div>
+                             ))}
+                           </div>
+                        </section>
+                    </aside>
+
+                    {/* Middle Column */}
+                    <main className="w-[44%] h-full rounded-2xl" style={{ backgroundColor: theme.colors.background, color: theme.colors.text, padding: `${globalStyles.s(10)} ${globalStyles.s(8)}` }}>
+                        <header style={{marginBottom: headerStyles.s(8), textAlign: 'center'}}>
+                            <h1 className="font-bold" style={{ color: theme.colors.primary, fontSize: headerStyles.font['4xl'] }}>{personalInfo.name || "Your Name"}</h1>
+                            <h2 style={{ color: theme.colors.secondary, fontSize: headerStyles.font['xl'], marginTop: headerStyles.s(1) }}>{personalInfo.title || "Your Title"}</h2>
+                        </header>
+                        <section style={{marginBottom: summaryStyles.s(6)}}>
+                            <p className="leading-relaxed text-center" style={{fontSize: summaryStyles.font.sm}}>{personalInfo.summary}</p>
+                        </section>
+                        <section style={{marginTop: experienceStyles.s(6)}}>
+                            <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: experienceStyles.font.xl}}>Experience</h3>
+                            <div style={{ height: '2px', backgroundColor: theme.colors.accent, width: '50px', transform: 'skewY(-3deg)', marginTop: experienceStyles.s(1), marginBottom: experienceStyles.s(4) }}></div>
+                            <div className="flex flex-col relative" style={{gap: experienceStyles.s(5)}}>
+                                {experience.map((exp) => (
+                                  <div key={exp.id}>
+                                    <div className="flex justify-between items-baseline">
+                                      <h4 className="font-semibold" style={{ color: theme.colors.primary, fontSize: experienceStyles.font.lg }}>{exp.role}</h4>
+                                      <p className="font-medium" style={{ color: theme.colors.textSecondary, fontSize: experienceStyles.font.sm }}>{exp.startDate} - {exp.endDate}</p>
+                                    </div>
+                                    <p className="font-medium" style={{ color: theme.colors.secondary, fontSize: experienceStyles.font.base }}>{exp.company}</p>
+                                    <div className="flex flex-col" style={{marginTop: experienceStyles.s(2), gap: experienceStyles.s(1)}}>{renderDescription(exp.description, {fontSize: experienceStyles.font.base})}</div>
+                                  </div>
+                                ))}
+                            </div>
+                        </section>
+                         <section style={{marginTop: educationStyles.s(6)}}>
+                            <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: educationStyles.font.xl}}>Education</h3>
+                            <div style={{ height: '2px', backgroundColor: theme.colors.accent, width: '50px', transform: 'skewY(-3deg)', marginTop: educationStyles.s(1), marginBottom: educationStyles.s(4) }}></div>
+                            <div className="flex flex-col relative" style={{gap: educationStyles.s(4)}}>
+                                {education.map(edu => (
+                                  <div key={edu.id}>
+                                    <div className="flex justify-between items-baseline">
+                                      <h4 className="font-semibold" style={{ color: theme.colors.primary, fontSize: educationStyles.font.lg }}>{edu.degree}</h4>
+                                      <p className="font-medium" style={{ color: theme.colors.textSecondary, fontSize: educationStyles.font.sm }}>{edu.startDate} - {edu.endDate}</p>
+                                    </div>
+                                    <p className="font-medium" style={{ color: theme.colors.secondary, fontSize: educationStyles.font.base }}>{edu.institution}</p>
+                                  </div>
+                                ))}
+                            </div>
+                        </section>
+                    </main>
+                    
+                    {/* Right Column */}
+                    <aside 
+                        className="w-[28%] h-full flex flex-col rounded-2xl" 
+                        style={{ backgroundColor: theme.colors.rightSidebarBackground, color: theme.colors.rightSidebarText, padding: globalStyles.s(8), gap: globalStyles.s(8) }}
+                    >
+                       <section>
+                           <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.accent, fontSize: skillsStyles.font.base }}>Skills</h3>
+                           <div style={{ height: '2px', backgroundColor: theme.colors.accent, width: '40px', transform: 'skewY(-3deg)', marginTop: skillsStyles.s(1) }}></div>
+                           <div className="flex flex-wrap" style={{gap: skillsStyles.s(2), marginTop: skillsStyles.s(4)}}>
+                             {skills.map(skill => (
+                               skill.name && <span key={skill.id} className="rounded-md inline-flex items-center" style={{backgroundColor: theme.colors.accent, color: '#111827', fontWeight: 500, fontSize: skillsStyles.font.xs, padding: `${skillsStyles.s(1)} ${skillsStyles.s(3)}`}}>{skill.name}</span>
+                             ))}
+                           </div>
+                        </section>
+                        <section>
+                           <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.accent, fontSize: interestsStyles.font.base}}>Interests</h3>
+                           <div style={{ height: '2px', backgroundColor: theme.colors.accent, width: '40px', transform: 'skewY(-3deg)', marginTop: interestsStyles.s(1) }}></div>
+                           <ul className="list-disc list-inside flex flex-col" style={{marginTop: interestsStyles.s(4), gap: interestsStyles.s(1), fontSize: interestsStyles.font.sm}}>
+                             {interests.map(interest => (
+                               interest.name && <li key={interest.id}>{interest.name}</li>
+                             ))}
+                           </ul>
+                        </section>
+                    </aside>
+                </div>
+            </div>
+        );
+    }
+    
+    // Default 3-column layout (Tri-Column Impact)
+    return (
+        <div className={`w-full h-full flex ${theme.font} overflow-hidden`} style={{backgroundColor: theme.colors.background, fontSize: `${globalStyles.baseRem}px`}}>
+            {/* Left Column */}
+            <aside 
+                className="w-[28%] h-full flex flex-col" 
+                style={{ backgroundColor: theme.colors.leftSidebarBackground, color: theme.colors.leftSidebarText, padding: globalStyles.s(8), gap: globalStyles.s(8) }}
+            >
+                {hasPhoto && (
+                    <div className="flex justify-center">
+                        <img 
+                            src={personalInfo.photo} 
+                            alt={personalInfo.name} 
+                            className="w-32 h-32 rounded-full object-cover border-4"
+                            style={{borderColor: theme.colors.accent}}
+                        />
+                    </div>
+                )}
+                <section>
+                    <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.accent, borderColor: theme.colors.accent + '50', fontSize: contactStyles.font.base, marginBottom: contactStyles.s(3)}}>Contact</h3>
+                    <div className="flex flex-col" style={{ gap: contactStyles.s(3), marginTop: contactStyles.s(4)}}>
+                       <ContactInfoItem icon={<PhoneIcon className="w-4 h-4" />} text={personalInfo.phone} color={theme.colors.leftSidebarText!} style={{fontSize: contactStyles.font.sm, gap: contactStyles.s(3)}}/>
+                       <ContactInfoItem icon={<EmailIcon className="w-4 h-4" />} text={personalInfo.email} color={theme.colors.leftSidebarText!} style={{fontSize: contactStyles.font.sm, gap: contactStyles.s(3)}}/>
+                       <ContactInfoItem icon={<LocationIcon className="w-4 h-4" />} text={personalInfo.location} color={theme.colors.leftSidebarText!} style={{fontSize: contactStyles.font.sm, gap: contactStyles.s(3)}}/>
+                       <ContactInfoItem icon={<WebsiteIcon className="w-4 h-4" />} text={personalInfo.website} color={theme.colors.leftSidebarText!} style={{fontSize: contactStyles.font.sm, gap: contactStyles.s(3)}}/>
+                    </div>
+                </section>
+                <section>
+                   <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.accent, borderColor: theme.colors.accent + '50', fontSize: languagesStyles.font.base, marginBottom: languagesStyles.s(3)}}>Languages</h3>
+                   <div className="flex flex-col" style={{gap: languagesStyles.s(2), marginTop: languagesStyles.s(4)}}>
+                     {languages.map(lang => (
+                       lang.name && <div key={lang.id} style={{fontSize: languagesStyles.font.sm}}>
+                         <span>{lang.name}</span>
+                         {lang.level && <span className="opacity-75"> – {lang.level}</span>}
+                       </div>
+                     ))}
+                   </div>
+                </section>
+            </aside>
+
+            {/* Middle Column */}
+            <main className="w-[44%] h-full" style={{ color: theme.colors.text, padding: `${globalStyles.s(10)} ${globalStyles.s(8)}` }}>
+                <header style={{marginBottom: headerStyles.s(8)}}>
+                    <h1 className="font-bold" style={{ color: theme.colors.primary, fontSize: headerStyles.font['5xl'] }}>{personalInfo.name || "Your Name"}</h1>
+                    <h2 style={{ color: theme.colors.secondary, fontSize: headerStyles.font['2xl'], marginTop: headerStyles.s(1) }}>{personalInfo.title || "Your Title"}</h2>
+                </header>
+                
+                <section style={{marginBottom: summaryStyles.s(6)}}>
+                    <p className="leading-relaxed" style={{fontSize: summaryStyles.font.sm}}>{personalInfo.summary}</p>
+                </section>
+
+                <section style={{marginTop: experienceStyles.s(6)}}>
+                  <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, borderColor: theme.colors.primary + '50', fontSize: experienceStyles.font.xl, marginBottom: experienceStyles.s(4)}}>Experience</h3>
+                  <div className="flex flex-col relative" style={{gap: experienceStyles.s(5)}}>
+                    {experience.map((exp) => (
+                      <div key={exp.id}>
+                        <div className="flex justify-between items-baseline">
+                          <h4 className="font-semibold" style={{ color: theme.colors.primary, fontSize: experienceStyles.font.lg }}>{exp.role}</h4>
+                          <p className="font-medium" style={{ color: theme.colors.textSecondary, fontSize: experienceStyles.font.sm }}>{exp.startDate} - {exp.endDate}</p>
+                        </div>
+                        <p className="font-medium" style={{ color: theme.colors.secondary, fontSize: experienceStyles.font.base }}>{exp.company}</p>
+                        <div className="flex flex-col" style={{marginTop: experienceStyles.s(2), gap: experienceStyles.s(1)}}>{renderDescription(exp.description, {fontSize: experienceStyles.font.base})}</div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+
+                <section style={{marginTop: educationStyles.s(6)}}>
+                  <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, borderColor: theme.colors.primary + '50', fontSize: educationStyles.font.xl, marginBottom: educationStyles.s(4)}}>Education</h3>
+                   <div className="flex flex-col relative" style={{gap: educationStyles.s(4)}}>
+                    {education.map(edu => (
+                      <div key={edu.id}>
+                        <div className="flex justify-between items-baseline">
+                          <h4 className="font-semibold" style={{ color: theme.colors.primary, fontSize: educationStyles.font.lg }}>{edu.degree}</h4>
+                          <p className="font-medium" style={{ color: theme.colors.textSecondary, fontSize: educationStyles.font.sm }}>{edu.startDate} - {edu.endDate}</p>
+                        </div>
+                        <p className="font-medium" style={{ color: theme.colors.secondary, fontSize: educationStyles.font.base }}>{edu.institution}</p>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+            </main>
+            
+            {/* Right Column */}
+            <aside 
+                className="w-[28%] h-full flex flex-col" 
+                style={{ backgroundColor: theme.colors.rightSidebarBackground, color: theme.colors.rightSidebarText, padding: globalStyles.s(8), gap: globalStyles.s(8) }}
+            >
+                <section>
+                   <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, borderColor: theme.colors.primary + '50', fontSize: skillsStyles.font.base, marginBottom: skillsStyles.s(3)}}>Skills</h3>
+                   <div className="flex flex-wrap" style={{gap: skillsStyles.s(2), marginTop: skillsStyles.s(4)}}>
+                     {skills.map(skill => (
+                       skill.name && <span key={skill.id} className="rounded-full inline-flex items-center" style={{backgroundColor: theme.colors.accent, color: '#fff', fontSize: skillsStyles.font.xs, padding: `${skillsStyles.s(1)} ${skillsStyles.s(3)}`}}>{skill.name}</span>
+                     ))}
+                   </div>
+                </section>
+                 <section>
+                   <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, borderColor: theme.colors.primary + '50', fontSize: interestsStyles.font.base, marginBottom: interestsStyles.s(3)}}>Interests</h3>
+                   <ul className="list-disc list-inside flex flex-col" style={{marginTop: interestsStyles.s(4), gap: interestsStyles.s(1), fontSize: interestsStyles.font.sm}}>
+                     {interests.map(interest => (
+                       interest.name && <li key={interest.id}>{interest.name}</li>
+                     ))}
+                   </ul>
+                </section>
+            </aside>
+        </div>
+    );
+  }
+
   if (theme.layout.style === 'two-column') {
     const isCorporate = theme.name === 'Corporate Blue';
     const isEarthy = theme.name === 'Earthy Tones';
@@ -70,6 +306,103 @@ export const CVPreview: React.FC<CVPreviewProps> = ({ data, theme }) => {
     const experienceStyles = getSectionStyles('experience');
     const educationStyles = getSectionStyles('education');
 
+    if (theme.name === 'Diagonal Split') {
+        return (
+            <div className={`w-full h-full ${theme.font} ${theme.layout.borderRadius} overflow-hidden flex shadow-lg`} style={{ fontSize: `${globalStyles.baseRem}px` }}>
+                {/* Sidebar */}
+                <aside 
+                    className="w-[38%] h-full flex flex-col" 
+                    style={{ 
+                        background: `linear-gradient(135deg, ${theme.colors.sidebarBackground} 50%, #F1F5F9 50%)`, 
+                        color: theme.colors.sidebarText, 
+                        padding: globalStyles.s(10), 
+                        gap: globalStyles.s(8) 
+                    }}
+                >
+                    {hasPhoto && (
+                        <div className="flex justify-center" style={{marginBottom: globalStyles.s(2)}}>
+                            <img 
+                                src={personalInfo.photo} 
+                                alt={personalInfo.name} 
+                                className="w-36 h-36 rounded-full object-cover border-4 border-white shadow-md"
+                            />
+                        </div>
+                    )}
+                    
+                    <section>
+                        <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: sidebarContactStyles.font.lg, marginBottom: sidebarContactStyles.s(4)}}>Contact</h3>
+                        <div className="flex flex-col" style={{gap: sidebarContactStyles.s(3)}}>
+                           <ContactInfoItem icon={<PhoneIcon className="w-4 h-4" />} text={personalInfo.phone} color={theme.colors.sidebarText!} style={{fontSize: sidebarContactStyles.font.sm, gap: sidebarContactStyles.s(3)}} />
+                           <ContactInfoItem icon={<EmailIcon className="w-4 h-4" />} text={personalInfo.email} color={theme.colors.sidebarText!} style={{fontSize: sidebarContactStyles.font.sm, gap: sidebarContactStyles.s(3)}} />
+                           <ContactInfoItem icon={<LocationIcon className="w-4 h-4" />} text={personalInfo.location} color={theme.colors.sidebarText!} style={{fontSize: sidebarContactStyles.font.sm, gap: sidebarContactStyles.s(3)}} />
+                           <ContactInfoItem icon={<WebsiteIcon className="w-4 h-4" />} text={personalInfo.website} color={theme.colors.sidebarText!} style={{fontSize: sidebarContactStyles.font.sm, gap: sidebarContactStyles.s(3)}} />
+                        </div>
+                    </section>
+                    
+                    <section>
+                       <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: sidebarSkillsStyles.font.lg, marginBottom: sidebarSkillsStyles.s(4)}}>Skills</h3>
+                       <div className="flex flex-wrap" style={{gap: sidebarSkillsStyles.s(2)}}>
+                         {skills.map(skill => (
+                           skill.name && <span key={skill.id} className="rounded-md inline-flex items-center" style={{backgroundColor: theme.colors.accent, color: '#fff', fontSize: sidebarSkillsStyles.font.xs, padding: `${sidebarSkillsStyles.s(1)} ${sidebarSkillsStyles.s(3)}`}}>{skill.name}</span>
+                         ))}
+                       </div>
+                    </section>
+                </aside>
+
+                {/* Main Content */}
+                <main 
+                    className="w-[62%] h-full" 
+                    style={{ 
+                        color: theme.colors.text, 
+                        padding: globalStyles.s(10), 
+                        background: `linear-gradient(135deg, ${theme.colors.background} 50%, #F8FAFC 50%)` 
+                    }}
+                >
+                    <header style={{marginBottom: headerStyles.s(8)}}>
+                        <h1 className="font-bold" style={{ color: theme.colors.primary, fontSize: headerStyles.font['5xl'] }}>{personalInfo.name || "Your Name"}</h1>
+                        <h2 style={{ color: theme.colors.secondary, fontSize: headerStyles.font['2xl'], marginTop: headerStyles.s(1) }}>{personalInfo.title || "Your Title"}</h2>
+                    </header>
+                    
+                    <section>
+                        <p className="leading-relaxed" style={{fontSize: summaryStyles.font.sm}}>{personalInfo.summary}</p>
+                    </section>
+
+                    <section style={{marginTop: experienceStyles.s(8)}}>
+                      <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: experienceStyles.font.xl, marginBottom: experienceStyles.s(4)}}>Experience</h3>
+                      <div className="flex flex-col relative" style={{gap: experienceStyles.s(5)}}>
+                        {experience.map((exp) => (
+                          <div key={exp.id}>
+                            <div className="flex justify-between items-baseline">
+                              <h4 className="font-semibold" style={{ color: theme.colors.primary, fontSize: experienceStyles.font.lg }}>{exp.role}</h4>
+                              <p className="font-medium" style={{ color: theme.colors.textSecondary, fontSize: experienceStyles.font.sm }}>{exp.startDate} - {exp.endDate}</p>
+                            </div>
+                            <p className="font-medium" style={{ color: theme.colors.secondary, fontSize: experienceStyles.font.base }}>{exp.company}</p>
+                            <div className="flex flex-col" style={{marginTop: experienceStyles.s(2), gap: experienceStyles.s(1)}}>{renderDescription(exp.description, {fontSize: experienceStyles.font.base})}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+
+                    <section style={{marginTop: educationStyles.s(8)}}>
+                      <h3 className={theme.layout.sectionTitleStyle} style={{color: theme.colors.primary, fontSize: educationStyles.font.xl, marginBottom: educationStyles.s(4)}}>Education</h3>
+                      <div className="flex flex-col relative" style={{gap: educationStyles.s(4)}}>
+                        {education.map(edu => (
+                          <div key={edu.id}>
+                            <div className="flex justify-between items-baseline">
+                              <h4 className="font-semibold" style={{ color: theme.colors.primary, fontSize: educationStyles.font.lg }}>{edu.degree}</h4>
+                              <p className="font-medium" style={{ color: theme.colors.textSecondary, fontSize: educationStyles.font.sm }}>{edu.startDate} - {edu.endDate}</p>
+                            </div>
+                            <p className="font-medium" style={{ color: theme.colors.secondary, fontSize: educationStyles.font.base }}>{edu.institution}</p>
+                            <div className="flex flex-col" style={{marginTop: educationStyles.s(1), gap: educationStyles.s(1)}}>{renderDescription(edu.description, {fontSize: educationStyles.font.base})}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                </main>
+            </div>
+        );
+    }
+    
     if (isDeepBlue) {
         return (
             <div className={`w-full h-full flex ${theme.font} overflow-hidden`} style={{backgroundColor: theme.colors.background, fontSize: `${globalStyles.baseRem}px`}}>
