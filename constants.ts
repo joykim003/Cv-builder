@@ -1,4 +1,4 @@
-import type { CVData, Theme, FontOption } from './types';
+import type { CVData, Theme, FontOption, TutorialStep } from './types';
 
 export const INITIAL_CV_DATA: CVData = {
   personalInfo: {
@@ -39,6 +39,15 @@ export const INITIAL_CV_DATA: CVData = {
       description: 'Graduated with honors. Member of the university coding club and participated in multiple hackathons.'
     }
   ],
+  projects: [
+    {
+      id: 'proj1',
+      name: 'Personal Portfolio Website',
+      date: '2023',
+      link: 'alexdoe.dev',
+      description: '- Designed and developed a responsive personal portfolio using Next.js and Tailwind CSS.\n- Deployed on Vercel with CI/CD integration.'
+    }
+  ],
   skills: [
     { id: 'skill1', name: 'React & Next.js' },
     { id: 'skill2', name: 'TypeScript' },
@@ -73,10 +82,44 @@ export const EMPTY_CV_DATA: CVData = {
   },
   experience: [],
   education: [],
+  projects: [],
   skills: [],
   languages: [],
   interests: [],
 };
+
+export const TUTORIAL_STEPS: TutorialStep[] = [
+    {
+        targetId: 'theme-selector',
+        title: '1. Choose a Theme',
+        content: 'Start by selecting a theme that fits your style. You can customize colors, fonts, and spacing later!',
+        placement: 'bottom',
+    },
+    {
+        targetId: 'personal-info-form',
+        title: '2. Fill in Your Details',
+        content: 'This is where you enter all your professional information. The preview on the right will update as you type.',
+        placement: 'right',
+    },
+    {
+        targetId: 'draggable-section-summary',
+        title: '3. Reorder Sections',
+        content: 'Click and drag the handle on any section to change its order in the final document.',
+        placement: 'right',
+    },
+    {
+        targetId: 'cv-preview-container',
+        title: '4. See it Live',
+        content: 'Your CV is rendered here in real-time. What you see is what you get!',
+        placement: 'left',
+    },
+    {
+        targetId: 'download-button',
+        title: '5. Download Your CV',
+        content: 'Once you\'re happy with the result, click here to download a print-ready PDF.',
+        placement: 'left',
+    }
+];
 
 const FONT_OPTIONS: Record<string, FontOption> = {
   INTER: { name: 'Inter', value: 'font-sans' },

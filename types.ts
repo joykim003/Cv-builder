@@ -13,11 +13,19 @@ export interface Experience {
 }
 
 export interface Education {
-  id: string;
+  id:string;
   institution: string;
   degree: string;
   startDate: string;
   endDate: string;
+  description: string;
+}
+
+export interface Project {
+  id: string;
+  name: string;
+  date: string;
+  link: string;
   description: string;
 }
 
@@ -45,6 +53,7 @@ export interface CVData {
   };
   experience: Experience[];
   education: Education[];
+  projects: Project[];
   skills: Skill[];
   languages: Language[];
   interests: Interest[];
@@ -61,8 +70,8 @@ export interface ThemeSizing {
   spacing: number;      // multiplier
 }
 
-export type SectionKey = 'header' | 'summary' | 'experience' | 'education' | 'skills' | 'languages' | 'interests' | 'sidebarContact' | 'sidebarSkills' | 'sidebarLanguages' | 'sidebarInterests';
-export type ReorderableSectionKey = 'summary' | 'experience' | 'education' | 'skills' | 'languages' | 'interests';
+export type SectionKey = 'header' | 'summary' | 'experience' | 'education' | 'projects' | 'skills' | 'languages' | 'interests' | 'sidebarContact' | 'sidebarSkills' | 'sidebarLanguages' | 'sidebarInterests';
+export type ReorderableSectionKey = 'summary' | 'experience' | 'education' | 'projects' | 'skills' | 'languages' | 'interests';
 
 
 interface ThemeColors {
@@ -94,4 +103,11 @@ export interface Theme {
   };
   sizing: ThemeSizing;
   sectionSizing?: Partial<Record<SectionKey, Partial<ThemeSizing>>>;
+}
+
+export interface TutorialStep {
+  targetId: string;
+  title: string;
+  content: string;
+  placement?: 'top' | 'bottom' | 'left' | 'right';
 }

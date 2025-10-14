@@ -12,10 +12,6 @@ The goal is to make the first interaction intuitive, welcoming, and less intimid
     *   **Behavior:** On first load, present a welcome modal with two choices: "Start with an example" (current behavior) or "Start from scratch."
     *   **Appearance:** A clean, simple modal. If "Start from scratch" is chosen, all form fields will be empty, displaying inspiring placeholder text.
 
-*   **Interactive Mini-Tutorial:** (Status: TODO)
-    *   **Behavior:** For new users, a sequence of tooltips can guide them through the primary actions: filling info, choosing a theme, reordering sections, and downloading the CV.
-    *   **Appearance:** Use a non-intrusive library like Shepherd.js or Intro.js for guided tour pop-ups that match the application's aesthetic.
-
 ---
 
 ## 2. AI-Powered Content Assistance (Gemini Integration)

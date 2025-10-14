@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import type { Theme, ThemeSizing, SectionKey } from '../types';
 
@@ -70,6 +69,7 @@ const SIZING_SECTIONS: { key: SectionKey | 'global'; name: string }[] = [
     { key: 'summary', name: 'Summary' },
     { key: 'experience', name: 'Experience' },
     { key: 'education', name: 'Education' },
+    { key: 'projects', name: 'Projects' },
     { key: 'skills', name: 'Skills (Single Column)' },
     { key: 'languages', name: 'Languages' },
     { key: 'interests', name: 'Interests' },
@@ -132,7 +132,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ themes, selectedTh
   const currentColors = (isDarkMode && selectedTheme.darkColors) ? selectedTheme.darkColors : selectedTheme.colors;
 
   return (
-    <div>
+    <div id="theme-selector">
       <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-3">Choose a Theme</h3>
       <div className="grid grid-cols-3 gap-4">
         {themes.map(theme => (

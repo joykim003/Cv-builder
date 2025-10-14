@@ -1,11 +1,11 @@
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { CVForm } from './components/CVForm';
 import { CVPreview } from './components/CVPreview';
 import { ThemeSelector } from './components/ThemeSelector';
 import { WelcomeModal } from './components/WelcomeModal';
+import { Tutorial } from './components/Tutorial';
 import type { CVData, ReorderableSectionKey, Theme } from './types';
-import { INITIAL_CV_DATA, EMPTY_CV_DATA, THEMES } from './constants';
+import { INITIAL_CV_DATA, EMPTY_CV_DATA, THEMES, TUTORIAL_STEPS } from './constants';
 import { DownloadIcon, SunIcon, MoonIcon, EyeIcon, PencilIcon } from './components/Icons';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -39,6 +39,8 @@ const App: React.FC = () => {
   const previewRef = useRef<HTMLDivElement>(null);
   const [isPreviewVisibleOnMobile, setIsPreviewVisibleOnMobile] = useState(false);
   const [showWelcomeModal, setShowWelcomeModal] = useState(false);
+  const [isTutorialActive, setIsTutorialActive] = useState(false);
+  const [currentTutorialStep, setCurrentTutorialStep] = useState(0);
 
   // Effect to handle first visit and initialize data if it's not loaded from storage
   useEffect(() => {
@@ -79,7 +81,7 @@ const App: React.FC = () => {
         try {
             const parsedOrder = JSON.parse(savedOrder);
             // Basic validation to ensure it's an array of expected keys
-            const defaultKeys: ReorderableSectionKey[] = ['summary', 'experience', 'education', 'skills', 'languages', 'interests'];
+            const defaultKeys: ReorderableSectionKey[] = ['summary', 'experience', 'education', 'projects', 'skills', 'languages', 'interests'];
             if (Array.isArray(parsedOrder) && parsedOrder.every(k => defaultKeys.includes(k))) {
                 return parsedOrder;
             }
@@ -87,7 +89,7 @@ const App: React.FC = () => {
             console.error("Failed to parse section order from localStorage", e);
         }
     }
-    return ['summary', 'experience', 'education', 'skills', 'languages', 'interests'];
+    return ['summary', 'experience', 'education', 'projects', 'skills', 'languages', 'interests'];
   });
 
   useEffect(() => {
@@ -164,63 +166,43 @@ const App: React.FC = () => {
     if (!cvData) return;
     const cvPreviewElement = document.getElementById('cv-preview');
     if (!cvPreviewElement) {
-      console.error('CV preview element not found for PDF generation.');
-      return;
+        console.error('CV preview element not found for PDF generation.');
+        return;
     }
 
     setIsDownloading(true);
     setDownloadProgress(0);
-    const originalClasses = cvPreviewElement.className;
 
     try {
-        cvPreviewElement.className = 'w-[210mm] bg-white'; // No fixed height
-        await new Promise(resolve => setTimeout(resolve, 100));
-
         setDownloadProgress(10);
         const canvas = await html2canvas(cvPreviewElement, {
-            scale: 2,
+            scale: 2, // Higher scale for better quality
             useCORS: true,
             logging: false,
+            width: cvPreviewElement.offsetWidth,
+            height: cvPreviewElement.offsetHeight,
         });
-        setDownloadProgress(80);
 
+        setDownloadProgress(70);
         const imgData = canvas.toDataURL('image/png', 1.0);
+        
         const pdf = new jsPDF({
             orientation: 'portrait',
             unit: 'mm',
             format: 'a4',
         });
-
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
-        
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
-        const ratio = canvasHeight / canvasWidth;
-        const imgHeight = pdfWidth * ratio;
 
-        let heightLeft = imgHeight;
-        let position = 0;
-
-        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-        heightLeft -= pdfHeight;
-
-        while (heightLeft > 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
-            heightLeft -= pdfHeight;
-        }
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         
         setDownloadProgress(95);
         pdf.save(`${cvData.personalInfo.name.replace(/\s/g, '_')}_CV.pdf`);
-        
         setDownloadProgress(100);
 
     } catch (error) {
         console.error("An error occurred during PDF generation:", error);
     } finally {
-        cvPreviewElement.className = originalClasses;
         setTimeout(() => {
             setIsDownloading(false);
             setDownloadProgress(0);
@@ -234,6 +216,35 @@ const App: React.FC = () => {
     } else {
         previewRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+  };
+
+  const startTutorial = () => {
+    try {
+        const hasCompletedTutorial = localStorage.getItem('hasCompletedTutorial');
+        if (!hasCompletedTutorial) {
+            setIsTutorialActive(true);
+            setCurrentTutorialStep(0);
+        }
+    } catch(e) {
+        console.error("Could not access localStorage", e);
+    }
+  };
+
+  const handleNextTutorialStep = () => {
+      if (currentTutorialStep < TUTORIAL_STEPS.length - 1) {
+          setCurrentTutorialStep(prev => prev + 1);
+      } else {
+          handleEndTutorial();
+      }
+  };
+
+  const handleEndTutorial = () => {
+      setIsTutorialActive(false);
+      try {
+          localStorage.setItem('hasCompletedTutorial', 'true');
+      } catch(e) {
+        console.error("Could not set localStorage item", e);
+      }
   };
 
   const handleStartFromScratch = () => {
@@ -253,6 +264,8 @@ const App: React.FC = () => {
         console.error("Could not set localStorage item", e);
     }
     setShowWelcomeModal(false);
+    // Use a short timeout to allow the modal to animate out before starting the tutorial
+    setTimeout(startTutorial, 300);
   };
 
   if (!cvData) {
@@ -278,6 +291,14 @@ const App: React.FC = () => {
         <WelcomeModal 
             onStartFromScratch={handleStartFromScratch}
             onStartWithExample={handleStartWithExample}
+        />
+      )}
+      {isTutorialActive && (
+        <Tutorial
+          steps={TUTORIAL_STEPS}
+          currentStepIndex={currentTutorialStep}
+          onNext={handleNextTutorialStep}
+          onFinish={handleEndTutorial}
         />
       )}
       <main className="grid grid-cols-1 lg:grid-cols-2 min-h-screen gap-8 p-4 md:p-8">
@@ -319,6 +340,7 @@ const App: React.FC = () => {
             <div id="preview-header" className="w-full max-w-[210mm] flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">Live Preview</h2>
                 <button 
+                    id="download-button"
                     onClick={handleDownload}
                     disabled={isDownloading}
                     className="relative flex items-center justify-center gap-2 px-4 py-2 w-44 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 transition-all duration-300 transform hover:scale-105 disabled:bg-blue-400 disabled:cursor-not-allowed overflow-hidden"
@@ -341,7 +363,7 @@ const App: React.FC = () => {
                     )}
                 </button>
             </div>
-            <div id="cv-preview" className="w-[210mm] min-h-[297mm] bg-white shadow-2xl rounded-lg origin-top transform scale-[0.35] sm:scale-75 md:scale-[0.85] lg:scale-100">
+            <div id="cv-preview-container" className="w-[210mm] origin-top transform scale-[0.35] sm:scale-75 md:scale-[0.85] lg:scale-100">
                 <CVPreview data={cvData} theme={activeTheme} sectionOrder={sectionOrder} />
             </div>
         </div>

@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import type { CVData, Experience, Education, Skill, Language, Interest, ReorderableSectionKey } from '../types';
+import type { CVData, Experience, Education, Project, Skill, Language, Interest, ReorderableSectionKey } from '../types';
 import { v4 as uuidv4 } from 'uuid';
 import { DragHandleIcon } from './Icons';
 
@@ -95,6 +94,7 @@ const ImageUploadField: React.FC<{ label: string; photo: string; onPhotoChange: 
 
 
 const SectionWrapper: React.FC<{ 
+    id?: string;
     title: string; 
     children: React.ReactNode; 
     isDraggable?: boolean; 
@@ -103,8 +103,9 @@ const SectionWrapper: React.FC<{
     onDrop?: React.DragEventHandler<HTMLDivElement>;
     onDragEnd?: React.DragEventHandler<HTMLDivElement>;
     isDragging?: boolean;
-}> = ({ title, children, isDraggable, onDragStart, onDragOver, onDrop, onDragEnd, isDragging }) => (
+}> = ({ id, title, children, isDraggable, onDragStart, onDragOver, onDrop, onDragEnd, isDragging }) => (
     <div 
+        id={id}
         className={`mt-8 transition-opacity duration-300 ${isDragging ? 'opacity-50' : 'opacity-100'}`}
         draggable={isDraggable}
         onDragStart={onDragStart}
@@ -126,7 +127,7 @@ const SectionWrapper: React.FC<{
     </div>
 );
 
-type DeletableSection = 'experience' | 'education' | 'skills' | 'languages' | 'interests';
+type DeletableSection = 'experience' | 'education' | 'projects' | 'skills' | 'languages' | 'interests';
 
 export const CVForm: React.FC<CVFormProps> = ({ cvData, setCvData, accentColor, sectionOrder, setSectionOrder }) => {
     const [itemToDelete, setItemToDelete] = useState<{ section: DeletableSection; id: string } | null>(null);
@@ -151,11 +152,13 @@ export const CVForm: React.FC<CVFormProps> = ({ cvData, setCvData, accentColor, 
     };
 
     const addArrayItem = (section: DeletableSection) => {
-        let newItem: Experience | Education | Skill | Language | Interest;
+        let newItem: Experience | Education | Project | Skill | Language | Interest;
         if(section === 'experience') {
             newItem = { id: uuidv4(), company: '', role: '', startDate: '', endDate: '', description: '' };
         } else if (section === 'education') {
             newItem = { id: uuidv4(), institution: '', degree: '', startDate: '', endDate: '', description: '' };
+        } else if (section === 'projects') {
+            newItem = { id: uuidv4(), name: '', date: '', link: '', description: '' };
         } else if (section === 'skills') {
             newItem = { id: uuidv4(), name: '' };
         } else if (section === 'languages') {
@@ -261,6 +264,25 @@ export const CVForm: React.FC<CVFormProps> = ({ cvData, setCvData, accentColor, 
                 </>
             )
         },
+        projects: {
+            title: 'Projects',
+            content: (
+                <>
+                    {cvData.projects.map((proj, index) => (
+                      <div key={proj.id} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg space-y-3 relative">
+                        <InputField label="Project Name" value={proj.name} onChange={(e) => handleArrayChange('projects', index, 'name', e.target.value)} />
+                        <div className="grid grid-cols-2 gap-4">
+                          <InputField label="Date / Timeline" value={proj.date} onChange={(e) => handleArrayChange('projects', index, 'date', e.target.value)} placeholder="e.g., 2023" />
+                          <InputField label="Link" value={proj.link} onChange={(e) => handleArrayChange('projects', index, 'link', e.target.value)} placeholder="e.g., github.com/user/repo" />
+                        </div>
+                        <TextAreaField label="Description" value={proj.description} onChange={(e) => handleArrayChange('projects', index, 'description', e.target.value)} placeholder="- Key features and technologies used..." />
+                        <button type="button" onClick={() => setItemToDelete({ section: 'projects', id: proj.id })} className="absolute top-2 right-2 text-red-500 hover:text-red-700">&times;</button>
+                      </div>
+                    ))}
+                    <button type="button" onClick={() => addArrayItem('projects')} style={{backgroundColor: accentColor}} className="w-full py-2 text-white font-semibold rounded-md hover:opacity-90 transition">+ Add Project</button>
+                </>
+            )
+        },
         skills: {
             title: 'Skills',
             content: (
@@ -311,7 +333,7 @@ export const CVForm: React.FC<CVFormProps> = ({ cvData, setCvData, accentColor, 
 
   return (
     <form className="space-y-6 mt-6">
-      <div className="mt-8">
+      <div id="personal-info-form" className="mt-8">
         <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">Personal Information</h3>
         <div className="space-y-4">
             <ImageUploadField
@@ -332,6 +354,7 @@ export const CVForm: React.FC<CVFormProps> = ({ cvData, setCvData, accentColor, 
       {sectionOrder.map(sectionKey => (
         <SectionWrapper
             key={sectionKey}
+            id={`draggable-section-${sectionKey}`}
             title={sectionComponents[sectionKey].title}
             isDraggable
             onDragStart={(e) => handleDragStart(e, sectionKey)}
